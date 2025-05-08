@@ -1,10 +1,18 @@
 import json
 
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels_redis.core import RedisChannelLayer
+
+from urllib.parse import parse_qs
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        self.channel_layer: RedisChannelLayer
+        query_string = self.scope["query_string"].decode()
+        query_params = parse_qs(query_string)
+        self.username = query_params.get("username", [None])[0]
+
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.room_group_name = f"chat_{self.room_name}"
 
@@ -20,10 +28,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = text_data_json["message"]
 
         await self.channel_layer.group_send(
-            self.room_group_name, {"type": "chat.message", "message": message}
+            self.room_group_name,
+            {"type": "chat.message", "message": message, "user": self.username},
         )
 
     async def chat_message(self, event):
         message = event["message"]
+        user = event["user"]
 
-        await self.send(text_data=json.dumps({"message": message}))
+        await self.send(text_data=json.dumps({"message": message, "user": user}))
