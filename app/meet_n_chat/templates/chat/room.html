@@ -35,8 +35,21 @@
         const data = JSON.parse(e.data);
         message = data.message;
         user = data.user;
-        document.querySelector("#chat-log").value +=
-          user + ": " + message + "\n";
+        event = data.event;
+        switch (event) {
+          case "message":
+            document.querySelector("#chat-log").value +=
+              user + ": " + message + "\n";
+            break;
+          case "join":
+            document.querySelector("#chat-log").value +=
+              user + " joined the chat" + "\n";
+            break;
+          case "leave":
+            document.querySelector("#chat-log").value +=
+              user + " left the chat" + "\n";
+            break;
+        }
       };
 
       chatSocket.onclose = function (e) {
