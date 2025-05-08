@@ -4,6 +4,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels_redis.core import RedisChannelLayer
 
 from urllib.parse import parse_qs
+from app.meet_n_chat.utils import generate_random_color
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -12,6 +13,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         query_string = self.scope["query_string"].decode()
         query_params = parse_qs(query_string)
         self.username = query_params.get("username", [None])[0]
+        self.chat_color = generate_random_color()
 
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.room_group_name = f"chat_{self.room_name}"
@@ -22,13 +24,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.channel_layer.group_send(
             self.room_group_name,
-            {"type": "chat.message", "message": "", "user": self.username, "event": "join"},
+            {
+                "type": "chat.message",
+                "message": "",
+                "user": self.username,
+                "event": "join",
+                "chat_color": self.chat_color,
+            },
         )
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_send(
             self.room_group_name,
-            {"type": "chat.message", "message": "", "user": self.username, "event": "leave"},
+            {
+                "type": "chat.message",
+                "message": "",
+                "user": self.username,
+                "event": "leave",
+                "chat_color": self.chat_color,
+            },
         )
 
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
@@ -39,12 +53,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.channel_layer.group_send(
             self.room_group_name,
-            {"type": "chat.message", "message": message, "user": self.username, "event": "message"},
+            {
+                "type": "chat.message",
+                "message": message,
+                "user": self.username,
+                "event": "message",
+                "chat_color": self.chat_color,
+            },
         )
 
     async def chat_message(self, event):
         message = event["message"]
         user = event["user"]
         chat_event = event["event"]
+        chat_color = event["chat_color"]
 
-        await self.send(text_data=json.dumps({"message": message, "user": user, "event": chat_event}))
+        await self.send(
+            text_data=json.dumps(
+                {"message": message, "user": user, "event": chat_event, "chat_color": chat_color}
+            )
+        )
