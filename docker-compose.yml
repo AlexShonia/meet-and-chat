@@ -1,0 +1,9 @@
+
+services:
+  chat-redis:
+    container_name: chat-redis
+    restart: always
+    image: redis:7.0.15
+    hostname: redis-db
+    ports:
+      - "127.0.0.1:6381:6379"

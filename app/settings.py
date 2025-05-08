@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-3cd&@m4ywc(-b@t)4e(bwip9@vi$1=07z+scu+f6b5h)yaoyjh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "app.meet_n_chat",
 ]
 
 MIDDLEWARE = [
@@ -130,3 +131,11 @@ REST_FRAMEWORK = {
 }
 
 ASGI_APPLICATION = "app.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6381)],
+        }
+    }
+}
