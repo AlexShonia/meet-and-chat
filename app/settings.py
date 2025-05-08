@@ -27,6 +27,9 @@ SECRET_KEY = "django-insecure-3cd&@m4ywc(-b@t)4e(bwip9@vi$1=07z+scu+f6b5h)yaoyjh
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://meet-and-chat.ashonia.info",
+]
 
 
 # Application definition
@@ -140,6 +143,6 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [(REDIS_HOST, REDIS_PORT)],
-        }
+        },
     }
 }
