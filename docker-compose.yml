@@ -1,5 +1,20 @@
 
 services:
+  chat-backend:
+    restart: always
+    container_name: chat-backend
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:8006:80"
+    env_file:
+      - .env
+    volumes:
+      - .:/backend
+      - ./static:/backend/static
+      - ./media:/backend/media
+
   chat-redis:
     container_name: chat-redis
     restart: always
