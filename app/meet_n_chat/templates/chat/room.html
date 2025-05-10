@@ -4,108 +4,172 @@
   <head>
     <meta charset="utf-8" />
     <title>Chat Room</title>
+    <script>
+      // Immediately set theme before page renders
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
     <style>
-      body {
-        background-color: #000000;
-        color: #ffffff;
+      :root {
+        --bg-color: #ffffff;
+        --text-color: #000000;
+        --container-bg: #f0f0f0;
+        --border-color: #000000;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --hover-bg: #000000;
+        --hover-text: #ffffff;
       }
+
+      [data-theme="dark"] {
+        --bg-color: #000000;
+        --text-color: #ffffff;
+        --container-bg: #1a1a1a;
+        --border-color: #ffffff;
+        --shadow-color: rgba(255, 255, 255, 0.1);
+        --hover-bg: #ffffff;
+        --hover-text: #000000;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      .theme-switch {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 8px 16px;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        border: 2px solid var(--border-color);
+        border-radius: 0;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+
+      .theme-switch:hover {
+        background-color: var(--hover-bg);
+        color: var(--hover-text);
+      }
+
       #chat-log {
         height: 400px;
         overflow-y: auto;
-        border: 2px solid #ffffff;
+        border: 2px solid var(--border-color);
         padding: 10px;
         margin-bottom: 10px;
-        background-color: #1a1a1a;
+        background-color: var(--container-bg);
         border-radius: 0;
+        transition: background-color 0.3s, border-color 0.3s;
       }
+
       .message-container {
         margin-bottom: 8px;
       }
+
       .user-name {
-        color: #ffffff;
+        color: var(--text-color);
         font-weight: bold;
         margin-right: 8px;
       }
+
       .message {
-        color: #ffffff;
+        color: var(--text-color);
       }
+
       .system-message {
         color: #808080;
         font-style: italic;
         margin: 8px 0;
       }
+
       .input-container {
         display: flex;
         gap: 10px;
         width: 100%;
       }
+
       #chat-message-input {
         flex: 1;
         padding: 8px;
-        border: 2px solid #ffffff;
+        border: 2px solid var(--border-color);
         border-radius: 0;
-        background-color: #000000;
-        color: #ffffff;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: all 0.3s;
       }
+
       #chat-message-input::placeholder {
         color: #808080;
       }
+
       #chat-message-submit {
         padding: 8px 16px;
-        background-color: #ffffff;
-        color: #000000;
-        border: 2px solid #ffffff;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        border: 2px solid var(--border-color);
         border-radius: 0;
         cursor: pointer;
         white-space: nowrap;
         transition: all 0.2s;
       }
+
       #chat-message-submit:hover {
-        background-color: #000000;
-        color: #ffffff;
+        background-color: var(--hover-bg);
+        color: var(--hover-text);
       }
+
       .chat-container {
         max-width: 800px;
         margin: 20px auto;
         padding: 20px;
       }
+
       .status-container {
         display: flex;
         align-items: center;
         gap: 10px;
         margin-bottom: 10px;
       }
+
       #next-person-btn {
         padding: 8px 16px;
-        background-color: #ffffff;
-        color: #000000;
-        border: 2px solid #ffffff;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        border: 2px solid var(--border-color);
         border-radius: 0;
         cursor: pointer;
         white-space: nowrap;
         transition: all 0.2s;
       }
+
       #next-person-btn:hover {
-        background-color: #000000;
-        color: #ffffff;
+        background-color: var(--hover-bg);
+        color: var(--hover-text);
       }
+
       #go-back-btn {
         padding: 8px 16px;
-        background-color: #ffffff;
-        color: #000000;
-        border: 2px solid #ffffff;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        border: 2px solid var(--border-color);
         border-radius: 0;
         cursor: pointer;
         white-space: nowrap;
         transition: all 0.2s;
       }
+
       #go-back-btn:hover {
-        background-color: #000000;
-        color: #ffffff;
+        background-color: var(--hover-bg);
+        color: var(--hover-text);
       }
     </style>
   </head>
   <body>
+    <button class="theme-switch" onclick="toggleTheme()">Toggle Theme</button>
     <div class="chat-container">
       <div class="status-container">
         <button id="go-back-btn">Go Back</button>
@@ -122,7 +186,22 @@
         <input id="chat-message-submit" type="button" value="Send" />
       </div>
     </div>
+
     <script>
+      function toggleTheme() {
+        const root = document.documentElement;
+        const currentTheme = root.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+      }
+
+      // Set initial theme from localStorage or default to dark
+      document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      });
+
       const ws_scheme =
         window.location.protocol === "https:" ? "wss://" : "ws://";
 
