@@ -5,7 +5,7 @@
     <title>Choose Chat Type</title>
     <style>
       body {
-        background-color: #1a1a1a;
+        background-color: #000000;
         color: #ffffff;
         font-family: Arial, sans-serif;
         margin: 0;
@@ -17,17 +17,17 @@
         justify-content: center;
       }
       .container {
-        background-color: #2d2d2d;
+        background-color: #1a1a1a;
         padding: 40px;
-        border-radius: 12px;
-        border: 1px solid #333;
+        border-radius: 0;
+        border: 2px solid #ffffff;
         width: 100%;
         max-width: 800px;
         text-align: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
       }
       .title {
-        color: #64B5F6;
+        color: #ffffff;
         font-size: 32px;
         margin-bottom: 40px;
       }
@@ -38,9 +38,9 @@
         margin-top: 20px;
       }
       .chat-option {
-        background-color: #1a1a1a;
-        border: 2px solid #333;
-        border-radius: 8px;
+        background-color: #000000;
+        border: 2px solid #ffffff;
+        border-radius: 0;
         padding: 30px 20px;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -49,8 +49,8 @@
       }
       .chat-option:hover {
         transform: translateY(-5px);
-        border-color: #64B5F6;
-        box-shadow: 0 5px 15px rgba(100, 181, 246, 0.2);
+        border-color: #ffffff;
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
       }
       {% comment %} Remove later  {% endcomment %}
       .chat-option.disabled {
@@ -60,7 +60,7 @@
       .option-icon {
         font-size: 40px;
         margin-bottom: 15px;
-        color: #64B5F6;
+        color: #ffffff;
       }
       .option-title {
         font-size: 20px;
@@ -69,50 +69,52 @@
         color: #ffffff;
       }
       .one-on-one {
-        border-color: #4CAF50;
+        border-color: #ffffff;
       }
       .one-on-one:hover {
-        border-color: #4CAF50;
-        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+        border-color: #ffffff;
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
       }
       .one-on-one .option-icon {
-        color: #4CAF50;
+        color: #ffffff;
       }
       .group-chat {
-        border-color: #2196F3;
+        border-color: #ffffff;
       }
       .group-chat:hover {
-        border-color: #2196F3;
-        box-shadow: 0 5px 15px rgba(33, 150, 243, 0.2);
+        border-color: #ffffff;
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
       }
       .group-chat .option-icon {
-        color: #2196F3;
+        color: #ffffff;
       }
       .voice-chat {
-        border-color: #9C27B0;
+        border-color: #ffffff;
       }
       .voice-chat:hover {
-        border-color: #9C27B0;
-        box-shadow: 0 5px 15px rgba(156, 39, 176, 0.2);
+        border-color: #ffffff;
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
       }
       .voice-chat .option-icon {
-        color: #9C27B0;
+        color: #ffffff;
       }
       #back-home-btn {
         position: absolute;
         top: 20px;
         left: 20px;
         padding: 8px 16px;
-        background-color: #f44336;
-        color: white;
-        border: none;
-        border-radius: 4px;
+        background-color: #ffffff;
+        color: #000000;
+        border: 2px solid #ffffff;
+        border-radius: 0;
         cursor: pointer;
         text-decoration: none;
         font-size: 14px;
+        transition: all 0.2s;
       }
       #back-home-btn:hover {
-        background-color: #d32f2f;
+        background-color: #000000;
+        color: #ffffff;
       }
     </style>
   </head>

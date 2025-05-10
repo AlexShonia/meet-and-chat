@@ -6,31 +6,31 @@
     <title>Chat Room</title>
     <style>
       body {
-        background-color: #1a1a1a;
+        background-color: #000000;
         color: #ffffff;
       }
       #chat-log {
         height: 400px;
         overflow-y: auto;
-        border: 1px solid #333;
+        border: 2px solid #ffffff;
         padding: 10px;
         margin-bottom: 10px;
-        background-color: #2d2d2d;
-        border-radius: 4px;
+        background-color: #1a1a1a;
+        border-radius: 0;
       }
       .message-container {
         margin-bottom: 8px;
       }
       .user-name {
-        color: #64b5f6;
+        color: #ffffff;
         font-weight: bold;
         margin-right: 8px;
       }
       .message {
-        color: #e0e0e0;
+        color: #ffffff;
       }
       .system-message {
-        color: #9e9e9e;
+        color: #808080;
         font-style: italic;
         margin: 8px 0;
       }
@@ -42,25 +42,27 @@
       #chat-message-input {
         flex: 1;
         padding: 8px;
-        border: 1px solid #333;
-        border-radius: 4px;
-        background-color: #2d2d2d;
+        border: 2px solid #ffffff;
+        border-radius: 0;
+        background-color: #000000;
         color: #ffffff;
       }
       #chat-message-input::placeholder {
-        color: #9e9e9e;
+        color: #808080;
       }
       #chat-message-submit {
         padding: 8px 16px;
-        background-color: #64b5f6;
-        color: white;
-        border: none;
-        border-radius: 4px;
+        background-color: #ffffff;
+        color: #000000;
+        border: 2px solid #ffffff;
+        border-radius: 0;
         cursor: pointer;
         white-space: nowrap;
+        transition: all 0.2s;
       }
       #chat-message-submit:hover {
-        background-color: #42a5f5;
+        background-color: #000000;
+        color: #ffffff;
       }
       .chat-container {
         max-width: 800px;
@@ -75,27 +77,31 @@
       }
       #next-person-btn {
         padding: 8px 16px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
+        background-color: #ffffff;
+        color: #000000;
+        border: 2px solid #ffffff;
+        border-radius: 0;
         cursor: pointer;
         white-space: nowrap;
+        transition: all 0.2s;
       }
       #next-person-btn:hover {
-        background-color: #45a049;
+        background-color: #000000;
+        color: #ffffff;
       }
       #go-back-btn {
         padding: 8px 16px;
-        background-color: #f44336;
-        color: white;
-        border: none;
-        border-radius: 4px;
+        background-color: #ffffff;
+        color: #000000;
+        border: 2px solid #ffffff;
+        border-radius: 0;
         cursor: pointer;
         white-space: nowrap;
+        transition: all 0.2s;
       }
       #go-back-btn:hover {
-        background-color: #d32f2f;
+        background-color: #000000;
+        color: #ffffff;
       }
     </style>
   </head>
