@@ -1,13 +1,26 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.http import HttpRequest
+from uuid import uuid4
 
-def index(request):
-    return render(request, "chat/index.html")
+
+def index(request: HttpRequest):
+    return render(request, "index/index.html")
 
 
-def room(request):
-    room_name = request.POST["room_name"]
+def chat(request: HttpRequest):
+    return render(request, "chat/chat.html")
+
+
+def choose(request: HttpRequest):
     username = request.POST["username"]
+    request.session["username"] = username
+    request.session["user_id"] = uuid4().hex
 
-    return render(
-        request, "chat/room.html", {"room_name": room_name, "username": username}
-    )
+    return render(request, "chat/choose.html")
+
+
+def room(request: HttpRequest):
+    username = request.session.get("username")
+    if not username:
+        return redirect('index')
+    return render(request, "chat/room.html")

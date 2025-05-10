@@ -22,7 +22,7 @@
         margin-bottom: 8px;
       }
       .user-name {
-        color: #64B5F6;
+        color: #64b5f6;
         font-weight: bold;
         margin-right: 8px;
       }
@@ -52,7 +52,7 @@
       }
       #chat-message-submit {
         padding: 8px 16px;
-        background-color: #64B5F6;
+        background-color: #64b5f6;
         color: white;
         border: none;
         border-radius: 4px;
@@ -60,43 +60,68 @@
         white-space: nowrap;
       }
       #chat-message-submit:hover {
-        background-color: #42A5F5;
+        background-color: #42a5f5;
       }
       .chat-container {
         max-width: 800px;
         margin: 20px auto;
         padding: 20px;
       }
+      .status-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      #next-person-btn {
+        padding: 8px 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      #next-person-btn:hover {
+        background-color: #45a049;
+      }
+      #go-back-btn {
+        padding: 8px 16px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      #go-back-btn:hover {
+        background-color: #d32f2f;
+      }
     </style>
   </head>
   <body>
     <div class="chat-container">
+      <div class="status-container">
+        <button id="go-back-btn">Go Back</button>
+        <button id="next-person-btn">Next Person</button>
+        <div id="status"></div>
+      </div>
       <div id="chat-log"></div>
       <div class="input-container">
-        <input id="chat-message-input" type="text" placeholder="Type your message..." />
+        <input
+          id="chat-message-input"
+          type="text"
+          placeholder="Type your message..."
+        />
         <input id="chat-message-submit" type="button" value="Send" />
       </div>
     </div>
-    {{ room_name|json_script:"room-name" }} {{ username|json_script:"username"}}
     <script>
-      const roomName = JSON.parse(
-        document.getElementById("room-name").textContent
-      );
-      const userName = JSON.parse(
-        document.getElementById("username").textContent
-      );
-
       const ws_scheme =
         window.location.protocol === "https:" ? "wss://" : "ws://";
 
       const chatSocket = new WebSocket(
-        ws_scheme +
-          window.location.host +
-          "/ws/chat/" +
-          roomName +
-          "/" +
-          "?username=" +
-          userName
+        ws_scheme + window.location.host + "/ws/chat/"
       );
 
       chatSocket.onmessage = function (e) {
@@ -107,20 +132,27 @@
         const chat_color = data.chat_color;
         switch (event) {
           case "message":
-            document.querySelector("#chat-log").innerHTML += 
-              `<div class="message-container">
+            document.querySelector(
+              "#chat-log"
+            ).innerHTML += `<div class="message-container">
                 <span class="user-name" style="color: ${chat_color}">${user}:</span>
                 <span class="message">${message}</span>
               </div>`;
             break;
           case "join":
-            document.querySelector("#chat-log").innerHTML +=
-              `<div class="system-message"><span style="color: ${chat_color}">${user}</span> joined the chat</div>`;
+            document.querySelector(
+              "#chat-log"
+            ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> joined the chat</div>`;
+            document.querySelector("#status").innerHTML = `you were paired, say hi!`;
             break;
           case "leave":
-            document.querySelector("#chat-log").innerHTML +=
-              `<div class="system-message"><span style="color: ${chat_color}">${user}</span> left the chat</div>`;
+            document.querySelector(
+              "#chat-log"
+            ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> left the chat</div>`;
+            document.querySelector("#status").innerHTML = `${user} left the chat`;
             break;
+          case "searching":
+            document.querySelector("#status").innerHTML = "searching...";
         }
         // Auto scroll to bottom
         const chatLog = document.querySelector("#chat-log");
@@ -129,6 +161,14 @@
 
       chatSocket.onclose = function (e) {
         console.error("Chat socket closed unexpectedly");
+      };
+
+      document.querySelector("#next-person-btn").onclick = function (e) {
+        window.location.reload();
+      };
+
+      document.querySelector("#go-back-btn").onclick = function (e) {
+        window.history.back();
       };
 
       document.querySelector("#chat-message-input").focus();
@@ -142,7 +182,8 @@
       document.querySelector("#chat-message-submit").onclick = function (e) {
         const messageInputDom = document.querySelector("#chat-message-input");
         const message = messageInputDom.value;
-        if (message.trim()) {  // Only send if message is not empty
+        if (message.trim()) {
+          // Only send if message is not empty
           chatSocket.send(
             JSON.stringify({
               message: message,
