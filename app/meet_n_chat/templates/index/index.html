@@ -71,7 +71,7 @@
       }
 
       .container {
-        background-color: var(--container-bg);
+        background-color: var(--bg-color);
         padding: 30px;
         border: none;
         outline: none;
@@ -80,14 +80,74 @@
         max-width: 400px;
         text-align: center;
         box-shadow: none;
-        transition: background-color 0.3s;
+        transition: all 0.1s ease;
+      }
+
+      .container * {
+        transition: all 0.1s ease;
+      }
+
+      .container:hover {
+        background-color: var(--text-color);
+      }
+
+      .container:hover .title {
+        color: var(--bg-color);
+      }
+
+      .container:hover .divider {
+        color: var(--bg-color);
+      }
+
+      .container:hover .divider::before,
+      .container:hover .divider::after {
+        border-bottom: 1px solid var(--bg-color);
+      }
+
+      .container:hover .google-btn {
+        background-color: var(--text-color);
+        color: var(--bg-color);
+      }
+
+      .container:hover .google-btn:hover {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+      }
+
+      .container:hover input[type="text"] {
+        background-color: var(--text-color);
+        color: var(--bg-color);
+      }
+
+      .container:hover input[type="text"]:hover,
+      .container:hover input[type="text"]:focus {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+      }
+
+      .container:hover input[type="text"]:hover::placeholder,
+      .container:hover input[type="text"]:focus::placeholder {
+        color: var(--text-color);
+      }
+
+      .container:hover input[type="text"]::placeholder {
+        color: var(--bg-color);
+      }
+
+      .container:hover .guest-btn {
+        background-color: var(--text-color);
+        color: var(--bg-color);
+      }
+
+      .container:hover .guest-btn:hover {
+        background-color: var(--bg-color);
+        color: var(--text-color);
       }
 
       .title {
         color: var(--text-color);
         font-size: 24px;
         margin-bottom: 30px;
-        transition: color 0.3s;
       }
 
       .divider {
@@ -101,8 +161,7 @@
       .divider::after {
         content: "";
         flex: 1;
-        border: none;
-        outline: none;
+        border-bottom: 1px solid var(--text-color);
       }
 
       .divider::before {
@@ -124,13 +183,12 @@
         cursor: pointer;
         font-size: 16px;
         font-weight: bold;
-        transition: all 0.2s;
         margin-bottom: 20px;
       }
 
       .google-btn:hover {
-        background-color: var(--hover-bg);
-        color: var(--hover-text);
+        background-color: var(--text-color);
+        color: var(--bg-color);
       }
 
       form {
@@ -159,31 +217,21 @@
         color: var(--text-color);
         font-size: 16px;
         box-sizing: border-box;
-        transition: all 0.3s;
       }
 
-      input[type="text"]:hover {
-        background-color: var(--text-color);
-        color: var(--bg-color);
-      }
-
-      input[type="text"]:hover::placeholder {
-        color: var(--bg-color);
-      }
-
+      input[type="text"]:hover,
       input[type="text"]:focus {
         background-color: var(--text-color);
         color: var(--bg-color);
-        outline: none;
       }
 
+      input[type="text"]:hover::placeholder,
       input[type="text"]:focus::placeholder {
         color: var(--bg-color);
       }
 
       input[type="text"]::placeholder {
         color: var(--text-color);
-        transition: color 0.3s;
       }
 
       .guest-btn {
@@ -197,12 +245,11 @@
         cursor: pointer;
         font-size: 16px;
         font-weight: bold;
-        transition: all 0.2s;
       }
 
       .guest-btn:hover {
-        background-color: var(--hover-bg);
-        color: var(--hover-text);
+        background-color: var(--text-color);
+        color: var(--bg-color);
       }
 
       .disabled {
@@ -219,7 +266,7 @@
   <body>
     <button class="theme-switch" onclick="toggleTheme()">Toggle Theme</button>
     <div class="container">
-      <div class="title">MEET AND CHAT</div>
+      <div class="title" style="font-weight: bold">MEET AND CHAT</div>
       <button class="google-btn disabled" type="submit">Log in with Google</button>
       <div class="divider">or</div>
       <form method="POST" action="{% url 'choose' %}">
