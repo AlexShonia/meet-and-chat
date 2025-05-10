@@ -4,7 +4,7 @@ from uuid import uuid4
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels_redis.core import RedisChannelLayer
 
-from app.meet_n_chat.utils import generate_random_color
+from app.meet_n_chat.utils import pick_random_color
 from app.meet_n_chat.models import ChatQueue
 from channels.db import database_sync_to_async
 
@@ -32,7 +32,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Perhaps we dont store these inside this object?
         self.username = session.get("username")
         self.user_id = session.get("user_id")
-        self.chat_color = generate_random_color()
+        self.chat_color = pick_random_color()
 
         user_id, group_name = await pop_queue()
         if group_name and user_id != self.user_id:
