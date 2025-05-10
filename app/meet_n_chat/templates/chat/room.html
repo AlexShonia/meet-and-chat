@@ -76,7 +76,8 @@
       }
 
       #chat-messages::-webkit-scrollbar {
-        width: 8px;
+        width: 18px;
+        background: transparent;
       }
 
       #chat-messages::-webkit-scrollbar-track {
@@ -86,8 +87,10 @@
 
       #chat-messages::-webkit-scrollbar-thumb {
         background-color: var(--text-color);
-        border: none;
         border-radius: 0;
+        border: 5px solid transparent;
+        background-clip: padding-box;
+        min-height: 40px;
       }
 
       #chat-messages::-webkit-scrollbar-button {
@@ -243,7 +246,7 @@
       <div class="status-container">
         <button id="go-back-btn">Go Back</button>
         <button id="next-person-btn">Next Person</button>
-        <div id="status">searching...</div>
+        <div id="status">Searching...</div>
       </div>
       <div id="chat-messages"></div>
       <div class="input-container">
@@ -297,7 +300,7 @@
             document.querySelector(
               "#chat-messages"
             ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> joined the chat</div>`;
-            document.querySelector("#status").innerHTML = `you were paired, say hi!`;
+            document.querySelector("#status").innerHTML = `You were paired, say hi!`;
             break;
           case "leave":
             document.querySelector(
@@ -306,7 +309,7 @@
             document.querySelector("#status").innerHTML = `${user} left the chat`;
             break;
           case "searching":
-            document.querySelector("#status").innerHTML = "searching...";
+            document.querySelector("#status").innerHTML = "Searching...";
         }
         // Auto scroll to bottom
         const chatLog = document.querySelector("#chat-messages");
