@@ -7,10 +7,6 @@ def index(request: HttpRequest):
     return render(request, "index/index.html")
 
 
-def chat(request: HttpRequest):
-    return render(request, "chat/chat.html")
-
-
 def choose(request: HttpRequest):
     username = request.POST["username"]
     request.session["username"] = username
