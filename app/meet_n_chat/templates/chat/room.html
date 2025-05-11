@@ -241,6 +241,8 @@
     </style>
   </head>
   <body>
+    {% load static %}
+    <audio id="match-sound" src="{% static 'meet_n_chat/audio/match-notification.mp3' %}" preload="auto"></audio>
     <button class="theme-switch" onclick="toggleTheme()">Toggle Theme</button>
     <div class="chat-container">
       <div class="status-container">
@@ -297,6 +299,8 @@
               </div>`;
             break;
           case "join":
+            const matchSound = document.getElementById('match-sound');
+            matchSound.play();
             document.querySelector(
               "#chat-messages"
             ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> joined the chat</div>`;
