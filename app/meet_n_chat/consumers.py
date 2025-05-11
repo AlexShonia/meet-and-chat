@@ -89,7 +89,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
+        message = text_data_json.get("message")
+        type = text_data_json.get("type")
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -97,7 +98,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "type": "chat.message",
                 "message": message,
                 "user": self.username,
-                "event": "message",
+                "event": "image" if type == "image" else "message",
                 "chat_color": self.chat_color,
             },
         )

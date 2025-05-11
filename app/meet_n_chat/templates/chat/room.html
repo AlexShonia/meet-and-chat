@@ -4,13 +4,16 @@
   <head>
     <meta charset="utf-8" />
     <title>Chat Room</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
     <script>
       // Immediately set theme before page renders
-      const savedTheme = localStorage.getItem('theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', savedTheme);
+      const savedTheme = localStorage.getItem("theme") || "dark";
+      document.documentElement.setAttribute("data-theme", savedTheme);
     </script>
     <style>
       :root {
@@ -36,12 +39,12 @@
       body {
         background-color: var(--bg-color);
         color: var(--text-color);
-        font-family: 'Roboto Mono', monospace;
+        font-family: "Roboto Mono", monospace;
         transition: background-color 0.3s, color 0.3s;
       }
 
       * {
-        font-family: 'Roboto Mono', monospace;
+        font-family: "Roboto Mono", monospace;
       }
 
       .theme-switch {
@@ -67,10 +70,9 @@
       #chat-messages {
         height: 400px;
         overflow-y: auto;
-        padding: 20px;
         background-color: var(--bg-color);
         color: var(--text-color);
-        font-family: 'Roboto Mono', monospace;
+        font-family: "Roboto Mono", monospace;
         scrollbar-width: thin;
         scrollbar-color: var(--text-color) var(--bg-color);
       }
@@ -129,6 +131,7 @@
         display: flex;
         gap: 10px;
         width: 100%;
+        align-items: center;
       }
 
       #chat-message-input {
@@ -242,7 +245,11 @@
   </head>
   <body>
     {% load static %}
-    <audio id="match-sound" src="{% static 'meet_n_chat/audio/match-notification.mp3' %}" preload="auto"></audio>
+    <audio
+      id="match-sound"
+      src="{% static 'meet_n_chat/audio/match-notification.mp3' %}"
+      preload="auto"
+    ></audio>
     <button class="theme-switch" onclick="toggleTheme()">Toggle Theme</button>
     <div class="chat-container">
       <div class="status-container">
@@ -252,6 +259,12 @@
       </div>
       <div id="chat-messages"></div>
       <div class="input-container">
+        <label for="myFile" class="upload-icon" style="cursor: pointer; display: inline-block; width: 24px; height: 24px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="fill: var(--text-color);">
+            <path d="M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM323.8 202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.4 3.9-19.8 10.5l-87 127.6L170.7 297c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l96 0 32 0 208 0c8.9 0 17.1-4.9 21.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z"/>
+          </svg>
+        </label>
+        <input type="file" id="myFile" name="filename" accept="image/*" style="display: none;" />
         <input
           id="chat-message-input"
           type="text"
@@ -259,21 +272,22 @@
         />
         <input id="chat-message-submit" type="button" value="Send" />
       </div>
+      {% csrf_token %}
     </div>
 
     <script>
       function toggleTheme() {
         const root = document.documentElement;
-        const currentTheme = root.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        root.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
+        const currentTheme = root.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
       }
 
       // Set initial theme from localStorage or default to dark
-      document.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("theme") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
       });
 
       const ws_scheme =
@@ -299,21 +313,34 @@
               </div>`;
             break;
           case "join":
-            const matchSound = document.getElementById('match-sound');
+            const matchSound = document.getElementById("match-sound");
             matchSound.play();
             document.querySelector(
               "#chat-messages"
             ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> joined the chat</div>`;
-            document.querySelector("#status").innerHTML = `You were paired, say hi!`;
+            document.querySelector(
+              "#status"
+            ).innerHTML = `You were paired, say hi!`;
             break;
           case "leave":
             document.querySelector(
               "#chat-messages"
             ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> left the chat</div>`;
-            document.querySelector("#status").innerHTML = `${user} left the chat`;
+            document.querySelector(
+              "#status"
+            ).innerHTML = `${user} left the chat`;
             break;
           case "searching":
             document.querySelector("#status").innerHTML = "Searching...";
+            break;
+          case "image":
+            document.querySelector(
+              "#chat-messages"
+            ).innerHTML += `<div class="message-container">
+                <span class="user-name" style="color: ${chat_color}">${user}:</span>
+                <img src="${window.location.origin}${message}" style="max-width: 300px; max-height: 300px; object-fit: contain;"></img>
+              </div>`;
+            break;
         }
         // Auto scroll to bottom
         const chatLog = document.querySelector("#chat-messages");
@@ -348,11 +375,50 @@
           chatSocket.send(
             JSON.stringify({
               message: message,
+              type: "message",
             })
           );
           messageInputDom.value = "";
         }
       };
+
+      // Replace the form submit event listener with a file input change listener
+      document
+        .getElementById("myFile")
+        .addEventListener("change", function (e) {
+          if (this.files && this.files[0]) {
+            const formData = new FormData();
+            formData.append("filename", this.files[0]);
+            formData.append(
+              "csrfmiddlewaretoken",
+              document.querySelector("[name=csrfmiddlewaretoken]").value
+            );
+
+            fetch("{% url 'upload_image'%}", {
+              method: "POST",
+              body: formData,
+              headers: {
+                "X-CSRFToken": document.querySelector(
+                  "[name=csrfmiddlewaretoken]"
+                ).value,
+              },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.file) {
+                  chatSocket.send(
+                    JSON.stringify({
+                      message: data.file,
+                      type: "image",
+                    })
+                  );
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          }
+        });
     </script>
   </body>
 </html>
