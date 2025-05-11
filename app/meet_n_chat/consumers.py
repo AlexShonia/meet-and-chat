@@ -24,6 +24,9 @@ def pop_queue():
 def add_to_queue(room_group_name, user_id):
     ChatQueue.objects.create(group_name=room_group_name, user_id=user_id)
 
+@database_sync_to_async
+def delete_from_queue(user_id):
+    ChatQueue.objects.filter(user_id=user_id).delete()
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -81,6 +84,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             },
         )
 
+        await delete_from_queue(self.user_id)
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
