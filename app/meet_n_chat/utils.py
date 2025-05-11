@@ -1,14 +1,27 @@
 import random
 
+from app.meet_n_chat.models import ChatQueue
+from channels.db import database_sync_to_async
 
-def generate_random_color():
-    r = random.randint(100, 255)
-    g = random.randint(100, 255)
-    b = random.randint(100, 255)
 
-    hex_color = f"#{r:02x}{g:02x}{b:02x}"
-    return hex_color
+@database_sync_to_async
+def pop_queue():
+    queue = ChatQueue.objects.all()
+    if queue.count() > 0:
+        user_id = queue[0].user_id
+        group_name = queue[0].group_name
+        queue[0].delete()
+        return (user_id, group_name)
+    return None, None
 
+
+@database_sync_to_async
+def add_to_queue(room_group_name, user_id):
+    ChatQueue.objects.create(group_name=room_group_name, user_id=user_id)
+
+@database_sync_to_async
+def delete_from_queue(user_id):
+    ChatQueue.objects.filter(user_id=user_id).delete()
 
 def pick_random_color():
     return complementary_colors[random.randint(0, len(complementary_colors) - 1)]

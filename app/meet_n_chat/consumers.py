@@ -4,29 +4,13 @@ from uuid import uuid4
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels_redis.core import RedisChannelLayer
 
-from app.meet_n_chat.utils import pick_random_color
-from app.meet_n_chat.models import ChatQueue
-from channels.db import database_sync_to_async
+from app.meet_n_chat.utils import (
+    pick_random_color,
+    pop_queue,
+    add_to_queue,
+    delete_from_queue,
+)
 
-
-@database_sync_to_async
-def pop_queue():
-    queue = ChatQueue.objects.all()
-    if queue.count() > 0:
-        user_id = queue[0].user_id
-        group_name = queue[0].group_name
-        queue[0].delete()
-        return (user_id, group_name)
-    return None, None
-
-
-@database_sync_to_async
-def add_to_queue(room_group_name, user_id):
-    ChatQueue.objects.create(group_name=room_group_name, user_id=user_id)
-
-@database_sync_to_async
-def delete_from_queue(user_id):
-    ChatQueue.objects.filter(user_id=user_id).delete()
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
