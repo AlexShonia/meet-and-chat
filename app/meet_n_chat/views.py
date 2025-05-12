@@ -26,12 +26,12 @@ class ChooseView(APIView):
         return render(request, "chat/choose.html")
 
 
-class RoomView(APIView):
+class ChatView(APIView):
     def get(self, request: Request):
         username = request.session.get("username")
         if not username:
             return redirect("index")
-        return render(request, "chat/room.html")
+        return render(request, "chat/chat.html")
 
 
 class FileUploadView(APIView):
@@ -54,3 +54,13 @@ class FileUploadView(APIView):
 
         file_url = f"{settings.MEDIA_URL}{up_file.name}"
         return Response({"file": file_url}, status=status.HTTP_201_CREATED)
+
+
+class VoiceChatView(APIView):
+    def get(self, request: Request):
+        username = request.session.get("username")
+        user_id = request.session.get("user_id")
+
+        if not username:
+            return redirect("index")
+        return render(request, "chat/voice-chat.html", {"user_id": user_id})

@@ -1,11 +1,11 @@
 import random
 
-from app.meet_n_chat.models import ChatQueue
+from app.meet_n_chat.models import ChatQueue, VoiceChatQueue
 from channels.db import database_sync_to_async
 
 
 @database_sync_to_async
-def pop_queue():
+def pop_chat_queue():
     queue = ChatQueue.objects.all()
     if queue.count() > 0:
         user_id = queue[0].user_id
@@ -16,12 +16,31 @@ def pop_queue():
 
 
 @database_sync_to_async
-def add_to_queue(room_group_name, user_id):
+def add_chat_queue(room_group_name, user_id):
     ChatQueue.objects.create(group_name=room_group_name, user_id=user_id)
 
 @database_sync_to_async
-def delete_from_queue(user_id):
+def delete_chat_queue(user_id):
     ChatQueue.objects.filter(user_id=user_id).delete()
+
+@database_sync_to_async
+def pop_voice_chat_queue():
+    queue = VoiceChatQueue.objects.all()
+    if queue.count() > 0:
+        user_id = queue[0].user_id
+        group_name = queue[0].group_name
+        queue[0].delete()
+        return (user_id, group_name)
+    return None, None
+
+
+@database_sync_to_async
+def add_voice_chat_queue(room_group_name, user_id):
+    VoiceChatQueue.objects.create(group_name=room_group_name, user_id=user_id)
+
+@database_sync_to_async
+def delete_voice_chat_queue(user_id):
+    VoiceChatQueue.objects.filter(user_id=user_id).delete()
 
 def pick_random_color():
     return complementary_colors[random.randint(0, len(complementary_colors) - 1)]
