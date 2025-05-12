@@ -390,17 +390,23 @@
             document.querySelector("#status").innerHTML = "Searching...";
             break;
           case "image":
-            document.querySelector(
-              "#chat-messages"
-            ).innerHTML += `<div class="message-container">
-                <span class="user-name" style="color: ${chat_color}">${user}:</span>
-                <img src="${window.location.origin}${message}" style="max-width: 300px; max-height: 300px; object-fit: contain;"></img>
-              </div>`;
+            const imgContainer = document.createElement('div');
+            imgContainer.className = 'message-container';
+            imgContainer.innerHTML = `<span class="user-name" style="color: ${chat_color}">${user}:</span>
+              <img src="${window.location.origin}${message}" style="max-width: 300px; max-height: 300px; object-fit: contain;"></img>`;
+            document.querySelector("#chat-messages").appendChild(imgContainer);
+            const img = imgContainer.querySelector('img');
+            img.onload = function() {
+              const chatLog = document.querySelector("#chat-messages");
+              chatLog.scrollTop = chatLog.scrollHeight;
+            };
             break;
         }
         // Auto scroll to bottom
         const chatLog = document.querySelector("#chat-messages");
-        chatLog.scrollTop = chatLog.scrollHeight;
+        if (event !== "image") {
+          chatLog.scrollTop = chatLog.scrollHeight;
+        }
       };
 
       chatSocket.onclose = function (e) {
