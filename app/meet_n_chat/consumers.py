@@ -75,8 +75,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
-        print("text", text_data)
-
         text_data_json = json.loads(text_data)
         message = text_data_json.get("message")
         type = text_data_json.get("type")
@@ -177,7 +175,6 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
         type = text_data_json.get("type")
         offer = text_data_json.get("offer")
         answer = text_data_json.get("answer")
-        print("textdata", text_data_json)
 
         if offer:
             await self.channel_layer.group_send(

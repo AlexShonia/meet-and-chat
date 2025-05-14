@@ -374,7 +374,6 @@
       });
 
       const userID = JSON.parse(document.getElementById("user-id").textContent);
-      console.log("userid", userID);
 
       const ws_scheme =
         window.location.protocol === "https:" ? "wss://" : "ws://";
@@ -386,13 +385,6 @@
       const openMediaDevices = async (constraints) => {
         return await navigator.mediaDevices.getUserMedia(constraints);
       };
-
-      try {
-        const stream = openMediaDevices({ video: true, audio: true });
-        console.log("Got MediaStream:", stream);
-      } catch (error) {
-        console.error("Error accessing media devices.", error);
-      }
 
       async function handleChatMessage(data) {
         const message = data.message;
@@ -412,6 +404,7 @@
             break;
           case "join":
             const matchSound = document.getElementById("match-sound");
+            matchSound.volume = 0.3;
             matchSound.play();
             document.querySelector(
               "#chat-messages"
@@ -446,7 +439,7 @@
             };
             break;
         }
-        // Auto scroll to bottom
+
         const chatLog = document.querySelector("#chat-messages");
         if (event !== "image") {
           chatLog.scrollTop = chatLog.scrollHeight;
@@ -454,64 +447,96 @@
       }
 
       async function makeCall(messageUserID) {
-        const amCaller = userID != messageUserID
+        const amCaller = userID != messageUserID;
         const configuration = {
           iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
         };
         const peerConnection = new RTCPeerConnection(configuration);
 
+        let stream;
+        try {
+          stream = await openMediaDevices({ video: false, audio: true });
+        } catch (error) {
+          console.error("Error accessing media devices.", error);
+        }
+
+        stream.getAudioTracks().forEach((track) => {
+          peerConnection.addTrack(track, stream);
+        });
+
+        const remoteAudio = new Audio();
+        remoteAudio.autoplay = true;
+
+        peerConnection.addEventListener("track", (event) => {
+          const [remoteStream] = event.streams;
+          remoteAudio.srcObject = remoteStream;
+        });
+
+        const waitForIceGathering = () => {
+          return new Promise((resolve) => {
+            if (peerConnection.iceGatheringState === "complete") {
+              resolve();
+            } else {
+              const checkState = () => {
+                if (peerConnection.iceGatheringState === "complete") {
+                  peerConnection.removeEventListener(
+                    "icegatheringstatechange",
+                    checkState
+                  );
+                  resolve();
+                }
+              };
+              peerConnection.addEventListener(
+                "icegatheringstatechange",
+                checkState
+              );
+            }
+          });
+        };
+
+        peerConnection.onicecandidate = (event) => {
+          // TODO: implement trickling
+        };
+
+        if (amCaller) {
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+
+          await waitForIceGathering();
+
+          chatSocket.send(
+            JSON.stringify({ offer: peerConnection.localDescription })
+          );
+        }
+
         chatSocket.onmessage = async (e) => {
           const data = JSON.parse(e.data);
 
           if (data?.answer && amCaller) {
-            const remoteDesc = new RTCSessionDescription(data.answer);
-            await peerConnection.setRemoteDescription(remoteDesc);
-            return;
+            await peerConnection.setRemoteDescription(data.answer);
           }
 
           if (data?.offer && !amCaller) {
-            peerConnection.setRemoteDescription(
-              new RTCSessionDescription(data.offer)
-            );
+            await peerConnection.setRemoteDescription(data.offer);
 
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
-            chatSocket.send(JSON.stringify({ answer: answer }));
 
-            return;
+            await waitForIceGathering();
+
+            chatSocket.send(
+              JSON.stringify({ answer: peerConnection.localDescription })
+            );
           }
+
           await handleChatMessage(data);
         };
-        if (amCaller) {
-          const offer = await peerConnection.createOffer();
-          await peerConnection.setLocalDescription(offer);
-          chatSocket.send(JSON.stringify({ offer: offer }));
-        }
 
-        // Listen for local ICE candidates on the local RTCPeerConnection
-        peerConnection.addEventListener("icecandidate", (event) => {
-          console.log("event.candidate");
-          if (event.candidate) {
-            
-            // signalingChannel.send({ "new-ice-candidate": event.candidate });
-          }
-        });
-
-        // signalingChannel.addEventListener("message", async (message) => {
-        //   if (message.iceCandidate) {
-        //     try {
-        //       await peerConnection.addIceCandidate(message.iceCandidate);
-        //     } catch (e) {
-        //       console.error("Error adding received ice candidate", e);
-        //     }
-        //   }
-        // });
-
-        peerConnection.addEventListener("connectionstatechange", (event) => {
+        peerConnection.onconnectionstatechange = (event) => {
           if (peerConnection.connectionState === "connected") {
+            console.log("WE GOT CONNECTED");
           }
-        });
-
+        };
       }
 
       chatSocket.onmessage = async (e) => {
