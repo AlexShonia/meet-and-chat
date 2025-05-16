@@ -175,6 +175,7 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
         type = text_data_json.get("type")
         offer = text_data_json.get("offer")
         answer = text_data_json.get("answer")
+        ice_candidate = text_data_json.get("new-ice-candidate")
 
         if offer:
             await self.channel_layer.group_send(
@@ -190,6 +191,14 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
                 {
                     "type": "voice.chat.message",
                     "answer": answer,
+                },
+            )
+        elif ice_candidate:
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "voice.chat.message",
+                    "iceCandidate": ice_candidate,
                 },
             )
         else:
@@ -212,6 +221,7 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
         chat_color = event.get("chat_color")
         offer = event.get("offer")
         answer = event.get("answer")
+        ice_candidate = event.get("iceCandidate")
 
         if offer:
             await self.send(
@@ -226,6 +236,14 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
                 text_data=json.dumps(
                     {
                         "answer": answer,
+                    }
+                )
+            )
+        elif ice_candidate:
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "iceCandidate": ice_candidate,
                     }
                 )
             )

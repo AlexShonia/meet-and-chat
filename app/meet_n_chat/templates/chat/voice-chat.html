@@ -449,7 +449,12 @@
       async function makeCall(messageUserID) {
         const amCaller = userID != messageUserID;
         const configuration = {
-          iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+          iceServers: [
+            { urls: "stun:stun.l.google.com:19302" },
+            { urls: "stun:stun1.l.google.com:19302" },
+            { urls: "stun:stun3.l.google.com:3478" },
+            { urls: "stun:stun3.l.google.com:19302" },
+          ],
         };
         const peerConnection = new RTCPeerConnection(configuration);
 
@@ -494,39 +499,71 @@
           });
         };
 
-        peerConnection.onicecandidate = (event) => {
-          // TODO: implement trickling
-        };
+        peerConnection.addEventListener("icecandidate", (event) => {
+          if (event.candidate) {
+            chatSocket.send(
+              JSON.stringify({ "new-ice-candidate": event.candidate })
+            );
+          }
+        });
 
         if (amCaller) {
           const offer = await peerConnection.createOffer();
           await peerConnection.setLocalDescription(offer);
 
-          await waitForIceGathering();
+          // await waitForIceGathering();
 
           chatSocket.send(
             JSON.stringify({ offer: peerConnection.localDescription })
           );
         }
+        let pendingCandidates = [];
+        let remoteDescriptionSet = false;
 
         chatSocket.onmessage = async (e) => {
           const data = JSON.parse(e.data);
 
           if (data?.answer && amCaller) {
             await peerConnection.setRemoteDescription(data.answer);
+            remoteDescriptionSet = true;
+
+            for (const candidate of pendingCandidates) {
+
+                console.log("adding buffer candidates");
+              await peerConnection.addIceCandidate(candidate);
+            }
+            pendingCandidates = [];
           }
 
           if (data?.offer && !amCaller) {
             await peerConnection.setRemoteDescription(data.offer);
+            remoteDescriptionSet = true;
 
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
 
-            await waitForIceGathering();
-
             chatSocket.send(
               JSON.stringify({ answer: peerConnection.localDescription })
             );
+
+            for (const candidate of pendingCandidates) {
+              await peerConnection.addIceCandidate(candidate);
+            }
+            pendingCandidates = [];
+          }
+
+          if (data?.iceCandidate) {
+            if (remoteDescriptionSet) {
+              try {
+                console.log("adding candidates");
+                
+                await peerConnection.addIceCandidate(data.iceCandidate);
+              } catch (e) {
+                console.error("Error adding received ICE candidate", e);
+              }
+            } else {
+              pendingCandidates.push(data.iceCandidate);
+            }
           }
 
           await handleChatMessage(data);
