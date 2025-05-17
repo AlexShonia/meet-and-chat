@@ -458,7 +458,79 @@
         };
         const peerConnection = new RTCPeerConnection(configuration);
 
+
+        let pendingCandidates = [];
+        let remoteDescriptionSet = false;
+
+        chatSocket.onmessage = async (e) => {
+          const data = JSON.parse(e.data);
+
+          console.log("on message is ranj", data);
+
+          if (data?.answer && amCaller) {
+            await peerConnection.setRemoteDescription(data.answer);
+            remoteDescriptionSet = true;
+
+            for (const candidate of pendingCandidates) {
+              console.log("adding buffer candidates");
+              await peerConnection.addIceCandidate(candidate);
+            }
+            pendingCandidates = [];
+          }
+
+          if (data?.offer && !amCaller) {
+            console.log("got the offer");
+            await peerConnection.setRemoteDescription(data.offer);
+            remoteDescriptionSet = true;
+
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+
+            chatSocket.send(
+              JSON.stringify({ answer: peerConnection.localDescription })
+            );
+
+            for (const candidate of pendingCandidates) {
+              console.log("adding buffer candidates");
+              await peerConnection.addIceCandidate(candidate);
+            }
+            pendingCandidates = [];
+          }
+
+          if (data?.iceCandidate) {
+            if (remoteDescriptionSet) {
+              try {
+                console.log("adding candidates");
+
+                await peerConnection.addIceCandidate(data.iceCandidate);
+              } catch (e) {
+                console.error("Error adding received ICE candidate", e);
+              }
+            } else {
+              pendingCandidates.push(data.iceCandidate);
+            }
+          }
+
+          await handleChatMessage(data);
+        };
+
+        const remoteAudio = new Audio();
+        remoteAudio.autoplay = true;
+
+        peerConnection.addEventListener("track", (event) => {
+          const [remoteStream] = event.streams;
+          remoteAudio.srcObject = remoteStream;
+        });
+
+        peerConnection.onconnectionstatechange = (event) => {
+          if (peerConnection.connectionState === "connected") {
+            console.log("WE GOT CONNECTED");
+          }
+        };
+
+
         let stream;
+
         try {
           stream = await openMediaDevices({ video: false, audio: true });
         } catch (error) {
@@ -469,35 +541,7 @@
           peerConnection.addTrack(track, stream);
         });
 
-        const remoteAudio = new Audio();
-        remoteAudio.autoplay = true;
 
-        peerConnection.addEventListener("track", (event) => {
-          const [remoteStream] = event.streams;
-          remoteAudio.srcObject = remoteStream;
-        });
-
-        const waitForIceGathering = () => {
-          return new Promise((resolve) => {
-            if (peerConnection.iceGatheringState === "complete") {
-              resolve();
-            } else {
-              const checkState = () => {
-                if (peerConnection.iceGatheringState === "complete") {
-                  peerConnection.removeEventListener(
-                    "icegatheringstatechange",
-                    checkState
-                  );
-                  resolve();
-                }
-              };
-              peerConnection.addEventListener(
-                "icegatheringstatechange",
-                checkState
-              );
-            }
-          });
-        };
 
         peerConnection.addEventListener("icecandidate", (event) => {
           if (event.candidate) {
@@ -511,69 +555,10 @@
           const offer = await peerConnection.createOffer();
           await peerConnection.setLocalDescription(offer);
 
-          // await waitForIceGathering();
-
           chatSocket.send(
             JSON.stringify({ offer: peerConnection.localDescription })
           );
         }
-        let pendingCandidates = [];
-        let remoteDescriptionSet = false;
-
-        chatSocket.onmessage = async (e) => {
-          const data = JSON.parse(e.data);
-
-          if (data?.answer && amCaller) {
-            await peerConnection.setRemoteDescription(data.answer);
-            remoteDescriptionSet = true;
-
-            for (const candidate of pendingCandidates) {
-
-                console.log("adding buffer candidates");
-              await peerConnection.addIceCandidate(candidate);
-            }
-            pendingCandidates = [];
-          }
-
-          if (data?.offer && !amCaller) {
-            await peerConnection.setRemoteDescription(data.offer);
-            remoteDescriptionSet = true;
-
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-
-            chatSocket.send(
-              JSON.stringify({ answer: peerConnection.localDescription })
-            );
-
-            for (const candidate of pendingCandidates) {
-              await peerConnection.addIceCandidate(candidate);
-            }
-            pendingCandidates = [];
-          }
-
-          if (data?.iceCandidate) {
-            if (remoteDescriptionSet) {
-              try {
-                console.log("adding candidates");
-                
-                await peerConnection.addIceCandidate(data.iceCandidate);
-              } catch (e) {
-                console.error("Error adding received ICE candidate", e);
-              }
-            } else {
-              pendingCandidates.push(data.iceCandidate);
-            }
-          }
-
-          await handleChatMessage(data);
-        };
-
-        peerConnection.onconnectionstatechange = (event) => {
-          if (peerConnection.connectionState === "connected") {
-            console.log("WE GOT CONNECTED");
-          }
-        };
       }
 
       chatSocket.onmessage = async (e) => {
