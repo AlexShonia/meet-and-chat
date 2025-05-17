@@ -51,6 +51,7 @@
         ).innerHTML = `You were paired, say hi!`;
         break;
       case "leave":
+        matchSound.play();
         document.querySelector(
           "#chat-messages"
         ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> left the chat</div>`;

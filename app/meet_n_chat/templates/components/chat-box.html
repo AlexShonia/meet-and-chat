@@ -33,7 +33,6 @@
     font-family: "Roboto Mono", monospace;
   }
 
-
   #chat-messages {
     height: 400px;
     overflow-y: auto;
@@ -208,9 +207,6 @@
   }
 
   .audio-toggle {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
     width: 40px;
     height: 40px;
     cursor: pointer;
@@ -275,9 +271,8 @@
     }
   }
 </style>
-{% load static %}
+{% load static %} {% include "components/settings.html" %}
 
-{% include "components/settings.html" %}
 <audio
   id="match-sound"
   src="{% static 'meet_n_chat/audio/8bit-match-notification.mp3' %}"
@@ -288,13 +283,59 @@
     <button id="go-back-btn">Go Back</button>
     <button id="next-person-btn">Next Person</button>
     <div id="status">Searching...</div>
+    <button id="audio-toggle" class="audio-toggle" onclick="toggleAudio()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="800px"
+        height="800px"
+        viewBox="0 0 16 16"
+        fill="none"
+      >
+        <path d="M6 1H8V15H6L2 11H0V5H2L6 1Z" fill="#000000" />
+        <path
+          d="M14 8C14 5.79086 12.2091 4 10 4V2C13.3137 2 16 4.68629 16 8C16 11.3137 13.3137 14 10 14V12C12.2091 12 14 10.2091 14 8Z"
+          fill="#000000"
+        />
+        <path
+          d="M12 8C12 9.10457 11.1046 10 10 10V6C11.1046 6 12 6.89543 12 8Z"
+          fill="#000000"
+        />
+      </svg>
+    </button>
   </div>
   <div id="chat-messages"></div>
+
   <div class="input-container">
+    {% if voice_chat %}
+
+    <button
+      id="mic-toggle"
+      style="min-height: 24px; min-width: 24px"
+      class="audio-toggle"
+      onclick="toggleMic()"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 384 512"
+        style="fill: var(--text-color)"
+      >
+        <path
+          d="M192 0C139 0 96 43 96 96l0 160c0 53 43 96 96 96s96-43 96-96l0-160c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 89.1 66.2 162.7 152 174.4l0 33.6-48 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l72 0 72 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0 0-33.6c85.8-11.7 152-85.3 152-174.4l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 70.7-57.3 128-128 128s-128-57.3-128-128l0-40z"
+        />
+      </svg>
+    </button>
+
+    {% endif %}
     <label
       for="myFile"
       class="upload-icon"
-      style="cursor: pointer; display: inline-block; width: 24px; height: 24px"
+      style="
+        cursor: pointer;
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        flex: 0 0 auto;
+      "
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -324,3 +365,31 @@
   </div>
   {% csrf_token %}
 </div>
+
+<script>
+  function toggleAudio() {
+    const audioToggle = document.getElementById("audio-toggle");
+    const isMuted = audioToggle.getAttribute("data-muted") === "true";
+
+    if (isMuted) {
+      audioToggle.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800px" height="800px" viewBox="0 0 16 16" fill="none">
+              <path d="M6 1H8V15H6L2 11H0V5H2L6 1Z" fill="#000000"/>
+              <path d="M14 8C14 5.79086 12.2091 4 10 4V2C13.3137 2 16 4.68629 16 8C16 11.3137 13.3137 14 10 14V12C12.2091 12 14 10.2091 14 8Z" fill="#000000"/>
+              <path d="M12 8C12 9.10457 11.1046 10 10 10V6C11.1046 6 12 6.89543 12 8Z" fill="#000000"/>
+            </svg>
+          `;
+      audioToggle.setAttribute("data-muted", "false");
+      matchSound.volume = 0.3;
+    } else {
+      audioToggle.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800px" height="800px" viewBox="0 0 16 16" fill="none">
+              <path d="M8 1H6L2 5H0V11H2L6 15H8V1Z" fill="#000000"/>
+              <path d="M9.29289 6.20711L11.0858 8L9.29289 9.79289L10.7071 11.2071L12.5 9.41421L14.2929 11.2071L15.7071 9.79289L13.9142 8L15.7071 6.20711L14.2929 4.79289L12.5 6.58579L10.7071 4.79289L9.29289 6.20711Z" fill="#000000"/>
+            </svg>
+          `;
+      audioToggle.setAttribute("data-muted", "true");
+      matchSound.volume = 0;
+    }
+  }
+</script>
