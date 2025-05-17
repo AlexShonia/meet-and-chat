@@ -33,24 +33,6 @@
     font-family: "Roboto Mono", monospace;
   }
 
-  .theme-switch {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 8px 16px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    border: none;
-    outline: none;
-    border-radius: 0;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  .theme-switch:hover {
-    background-color: var(--hover-bg);
-    color: var(--hover-text);
-  }
 
   #chat-messages {
     height: 400px;
@@ -278,13 +260,6 @@
       padding: 10px;
       height: 38px;
     }
-    .theme-switch {
-      width: 48vw;
-      min-width: 100px;
-      max-width: 200px;
-      height: 48px;
-      font-size: 13px;
-    }
     #status {
       text-align: left;
       width: 100%;
@@ -301,7 +276,8 @@
   }
 </style>
 {% load static %}
-<button class="theme-switch" onclick="toggleTheme()">Toggle Theme</button>
+
+{% include "components/settings.html" %}
 <audio
   id="match-sound"
   src="{% static 'meet_n_chat/audio/8bit-match-notification.mp3' %}"

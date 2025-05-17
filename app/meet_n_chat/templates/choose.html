@@ -1,288 +1,284 @@
+{% extends "base.html" %} {% block content %}
+<style>
+  :root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --container-bg: #ffffff;
+    --border-color: #000000;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --hover-bg: #000000;
+    --hover-text: #ffffff;
+  }
 
-{% extends "base.html" %}
+  [data-theme="dark"] {
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --container-bg: #000000;
+    --border-color: #ffffff;
+    --shadow-color: rgba(255, 255, 255, 0.1);
+    --hover-bg: #ffffff;
+    --hover-text: #000000;
+  }
 
-{% block content %}
-    <style>
-      :root {
-        --bg-color: #ffffff;
-        --text-color: #000000;
-        --container-bg: #ffffff;
-        --border-color: #000000;
-        --shadow-color: rgba(0, 0, 0, 0.1);
-        --hover-bg: #000000;
-        --hover-text: #ffffff;
-      }
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: "Roboto Mono", monospace;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 
-      [data-theme="dark"] {
-        --bg-color: #000000;
-        --text-color: #ffffff;
-        --container-bg: #000000;
-        --border-color: #ffffff;
-        --shadow-color: rgba(255, 255, 255, 0.1);
-        --hover-bg: #ffffff;
-        --hover-text: #000000;
-      }
+  * {
+    font-family: "Roboto Mono", monospace;
+  }
 
-      body {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        font-family: "Roboto Mono", monospace;
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
+  .theme-switch,
+  #back-home-btn {
+    position: fixed;
+    top: 20px;
+    padding: 8px 16px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: none;
+    outline: none;
+    border-radius: 0;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+  }
 
-      * {
-        font-family: "Roboto Mono", monospace;
-      }
+  .theme-switch {
+    right: 20px;
+  }
 
-      .theme-switch,
-      #back-home-btn {
-        position: fixed;
-        top: 20px;
-        padding: 8px 16px;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        border: none;
-        outline: none;
-        border-radius: 0;
-        cursor: pointer;
-        font-size: 14px;
-        text-decoration: none;
-      }
+  #back-home-btn {
+    left: 20px;
+  }
 
-      .theme-switch {
-        right: 20px;
-      }
+  .theme-switch:hover,
+  #back-home-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--hover-text);
+  }
 
-      #back-home-btn {
-        left: 20px;
-      }
+  .container {
+    background-color: var(--container-bg);
+    padding: 40px;
+    border-radius: 0;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+    box-shadow: none;
+  }
 
-      .theme-switch:hover,
-      #back-home-btn:hover {
-        background-color: var(--hover-bg);
-        color: var(--hover-text);
-      }
+  .title {
+    color: var(--text-color);
+    font-size: 32px;
+    margin-bottom: 40px;
+  }
 
-      .container {
-        background-color: var(--container-bg);
-        padding: 40px;
-        border-radius: 0;
-        width: 100%;
-        max-width: 800px;
-        text-align: center;
-        box-shadow: none;
-      }
+  .options-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+    justify-items: center;
+  }
 
-      .title {
-        color: var(--text-color);
-        font-size: 32px;
-        margin-bottom: 40px;
-      }
+  .chat-option {
+    width: 200px;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: var(--bg-color);
+    border: none;
+    outline: none;
+    border-radius: 0;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text-color);
+    transform-origin: center;
+  }
 
-      .options-container {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        margin-top: 20px;
-        justify-items: center;
-      }
+  .chat-option:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    transform: scale(1.04);
+  }
 
-      .chat-option {
-        width: 200px;
-        height: 150px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        background-color: var(--bg-color);
-        border: none;
-        outline: none;
-        border-radius: 0;
-        cursor: pointer;
-        text-decoration: none;
-        color: var(--text-color);
-        transform-origin: center;
-      }
+  .chat-option:hover .option-icon {
+    color: var(--bg-color);
+  }
 
-      .chat-option:hover {
-        background-color: var(--text-color);
-        color: var(--bg-color);
-        transform: scale(1.04);
-      }
+  .chat-option:hover .option-title {
+    color: var(--bg-color);
+  }
 
-      .chat-option:hover .option-icon {
-        color: var(--bg-color);
-      }
+  .chat-option.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
-      .chat-option:hover .option-title {
-        color: var(--bg-color);
-      }
+  .chat-option.disabled:hover {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transform: none;
+  }
 
-      .chat-option.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
+  .chat-option.disabled:hover .option-icon,
+  .chat-option.disabled:hover .option-title {
+    color: var(--text-color);
+  }
 
-      .chat-option.disabled:hover {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        transform: none;
-      }
+  .option-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+    color: var(--text-color);
+    width: 40px;
+    height: 40px;
+    display: inline-block;
+  }
 
-      .chat-option.disabled:hover .option-icon,
-      .chat-option.disabled:hover .option-title {
-        color: var(--text-color);
-      }
+  .option-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
 
-      .option-icon {
-        font-size: 40px;
-        margin-bottom: 15px;
-        color: var(--text-color);
-        width: 40px;
-        height: 40px;
-        display: inline-block;
-      }
+  .option-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--text-color);
+  }
 
-      .option-icon svg {
-        width: 100%;
-        height: 100%;
-        fill: currentColor;
-      }
+  .one-on-one {
+    border: none;
+    outline: none;
+  }
 
-      .option-title {
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        color: var(--text-color);
-      }
+  .one-on-one:hover {
+    border: none;
+    outline: none;
+    box-shadow: none;
+  }
 
-      .one-on-one {
-        border: none;
-        outline: none;
-      }
+  .one-on-one .option-icon {
+    color: var(--text-color);
+  }
 
-      .one-on-one:hover {
-        border: none;
-        outline: none;
-        box-shadow: none;
-      }
+  .group-chat {
+    border: none;
+    outline: none;
+  }
 
-      .one-on-one .option-icon {
-        color: var(--text-color);
-      }
+  .group-chat:hover {
+    border: none;
+    outline: none;
+    box-shadow: none;
+  }
 
-      .group-chat {
-        border: none;
-        outline: none;
-      }
+  .group-chat .option-icon {
+    color: var(--text-color);
+  }
 
-      .group-chat:hover {
-        border: none;
-        outline: none;
-        box-shadow: none;
-      }
+  .voice-chat {
+    border: none;
+    outline: none;
+  }
 
-      .group-chat .option-icon {
-        color: var(--text-color);
-      }
+  .voice-chat:hover {
+    border: none;
+    outline: none;
+    box-shadow: none;
+  }
 
-      .voice-chat {
-        border: none;
-        outline: none;
-      }
+  .voice-chat .option-icon {
+    color: var(--text-color);
+  }
 
-      .voice-chat:hover {
-        border: none;
-        outline: none;
-        box-shadow: none;
-      }
+  @media (max-width: 700px) {
+    .container {
+      padding: 10px;
+      max-width: 100vw;
+    }
+    .options-container {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .chat-option {
+      width: 100%;
+      min-width: 0;
+      max-width: 320px;
+      height: 100px;
+      font-size: 13px;
+    }
+    .option-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+    .option-title {
+      font-size: 16px;
+    }
+    .theme-switch,
+    #back-home-btn {
+      width: 48vw;
+      min-width: 100px;
+      max-width: 200px;
+      height: 48px;
+      font-size: 13px;
+    }
+  }
+</style>
 
-      .voice-chat .option-icon {
-        color: var(--text-color);
-      }
+{% include "components/settings.html" %}
+<button id="back-home-btn" onclick="window.location.href='{% url 'index' %}'">
+  Back to Home
+</button>
 
-      @media (max-width: 700px) {
-        .container {
-          padding: 10px;
-          max-width: 100vw;
-        }
-        .options-container {
-          grid-template-columns: 1fr;
-          gap: 12px;
-        }
-        .chat-option {
-          width: 100%;
-          min-width: 0;
-          max-width: 320px;
-          height: 100px;
-          font-size: 13px;
-        }
-        .option-icon {
-          font-size: 28px;
-          width: 28px;
-          height: 28px;
-        }
-        .option-title {
-          font-size: 16px;
-        }
-        .theme-switch,
-        #back-home-btn {
-          width: 48vw;
-          min-width: 100px;
-          max-width: 200px;
-          height: 48px;
-          font-size: 13px;
-        }
-      }
-    </style>
-    <button class="theme-switch" onclick="toggleTheme()">Toggle Theme</button>
-    <button
-      id="back-home-btn"
-      onclick="window.location.href='{% url 'index' %}'"
-    >
-      Back to Home
-    </button>
-    <div class="container">
-      <div class="options-container">
-        <a href="{% url 'chat' %}" class="chat-option one-on-one">
-          <div class="option-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
-              <path
-                d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304l91.4 0C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7L29.7 512C13.3 512 0 498.7 0 482.3zM609.3 512l-137.8 0c5.4-9.4 8.6-20.3 8.6-32l0-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2l61.4 0C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"
-              />
-            </svg>
-          </div>
-          <div class="option-title">1-on-1 Chat</div>
-        </a>
-        <div class="chat-option group-chat disabled">
-          <div class="option-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
-              <path
-                d="M144 0a80 80 0 1 1 0 160A80 80 0 1 1 144 0zM512 0a80 80 0 1 1 0 160A80 80 0 1 1 512 0zM0 298.7C0 239.8 47.8 192 106.7 192l42.7 0c15.9 0 31 3.5 44.6 9.7c-1.3 7.2-1.9 14.7-1.9 22.3c0 38.2 16.8 72.5 43.3 96c-.2 0-.4 0-.7 0L21.3 320C9.6 320 0 310.4 0 298.7zM405.3 320c-.2 0-.4 0-.7 0c26.6-23.5 43.3-57.8 43.3-96c0-7.6-.7-15-1.9-22.3c13.6-6.3 28.7-9.7 44.6-9.7l42.7 0C592.2 192 640 239.8 640 298.7c0 11.8-9.6 21.3-21.3 21.3l-213.3 0zM224 224a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zM128 485.3C128 411.7 187.7 352 261.3 352l117.3 0C452.3 352 512 411.7 512 485.3c0 14.7-11.9 26.7-26.7 26.7l-330.7 0c-14.7 0-26.7-11.9-26.7-26.7z"
-              />
-            </svg>
-          </div>
-          <div class="option-title">Group Chat</div>
-        </div>
-        <div class="chat-option voice-chat">
-          <a href="{% url 'voice-chat' %}" class="chat-option one-on-one">
-            <div class="option-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
-                <path
-                  d="M192 0C139 0 96 43 96 96l0 160c0 53 43 96 96 96s96-43 96-96l0-160c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 89.1 66.2 162.7 152 174.4l0 33.6-48 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l72 0 72 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0 0-33.6c85.8-11.7 152-85.3 152-174.4l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 70.7-57.3 128-128 128s-128-57.3-128-128l0-40z"
-                />
-              </svg>
-            </div>
-            <div class="option-title">Voice Chat</div>
-          </a>
-        </div>
+<div class="container">
+  <div class="options-container">
+    <a href="{% url 'chat' %}" class="chat-option one-on-one">
+      <div class="option-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+          <path
+            d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304l91.4 0C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7L29.7 512C13.3 512 0 498.7 0 482.3zM609.3 512l-137.8 0c5.4-9.4 8.6-20.3 8.6-32l0-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2l61.4 0C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"
+          />
+        </svg>
       </div>
+      <div class="option-title">1-on-1 Chat</div>
+    </a>
+    <div class="chat-option group-chat disabled">
+      <div class="option-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+          <path
+            d="M144 0a80 80 0 1 1 0 160A80 80 0 1 1 144 0zM512 0a80 80 0 1 1 0 160A80 80 0 1 1 512 0zM0 298.7C0 239.8 47.8 192 106.7 192l42.7 0c15.9 0 31 3.5 44.6 9.7c-1.3 7.2-1.9 14.7-1.9 22.3c0 38.2 16.8 72.5 43.3 96c-.2 0-.4 0-.7 0L21.3 320C9.6 320 0 310.4 0 298.7zM405.3 320c-.2 0-.4 0-.7 0c26.6-23.5 43.3-57.8 43.3-96c0-7.6-.7-15-1.9-22.3c13.6-6.3 28.7-9.7 44.6-9.7l42.7 0C592.2 192 640 239.8 640 298.7c0 11.8-9.6 21.3-21.3 21.3l-213.3 0zM224 224a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zM128 485.3C128 411.7 187.7 352 261.3 352l117.3 0C452.3 352 512 411.7 512 485.3c0 14.7-11.9 26.7-26.7 26.7l-330.7 0c-14.7 0-26.7-11.9-26.7-26.7z"
+          />
+        </svg>
+      </div>
+      <div class="option-title">Group Chat</div>
     </div>
+    <div class="chat-option voice-chat">
+      <a href="{% url 'voice-chat' %}" class="chat-option one-on-one">
+        <div class="option-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+            <path
+              d="M192 0C139 0 96 43 96 96l0 160c0 53 43 96 96 96s96-43 96-96l0-160c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 89.1 66.2 162.7 152 174.4l0 33.6-48 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l72 0 72 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0 0-33.6c85.8-11.7 152-85.3 152-174.4l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 70.7-57.3 128-128 128s-128-57.3-128-128l0-40z"
+            />
+          </svg>
+        </div>
+        <div class="option-title">Voice Chat</div>
+      </a>
+    </div>
+  </div>
+</div>
 {% endblock %}

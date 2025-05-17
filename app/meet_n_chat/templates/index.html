@@ -1,358 +1,320 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Welcome to Chat</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <script>
-      // Immediately set theme before page renders
-      const savedTheme = localStorage.getItem("theme") || "dark";
-      document.documentElement.setAttribute("data-theme", savedTheme);
-    </script>
-    <style>
-      :root {
-        --bg-color: #ffffff;
-        --text-color: #000000;
-        --container-bg: #ffffff;
-        --border-color: #000000;
-        --shadow-color: rgba(0, 0, 0, 0.1);
-        --hover-bg: #000000;
-        --hover-text: #ffffff;
-      }
+{% extends "base.html" %} {% block content %}
+<style>
+  :root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --container-bg: #ffffff;
+    --border-color: #000000;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --hover-bg: #000000;
+    --hover-text: #ffffff;
+  }
 
-      [data-theme="dark"] {
-        --bg-color: #000000;
-        --text-color: #ffffff;
-        --container-bg: #000000;
-        --border-color: #ffffff;
-        --shadow-color: rgba(255, 255, 255, 0.1);
-        --hover-bg: #ffffff;
-        --hover-text: #000000;
-      }
+  [data-theme="dark"] {
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --container-bg: #000000;
+    --border-color: #ffffff;
+    --shadow-color: rgba(255, 255, 255, 0.1);
+    --hover-bg: #ffffff;
+    --hover-text: #000000;
+  }
 
-      body {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        font-family: "Roboto Mono", monospace;
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: "Roboto Mono", monospace;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 
-      * {
-        font-family: "Roboto Mono", monospace;
-      }
+  * {
+    font-family: "Roboto Mono", monospace;
+  }
 
-      .theme-switch {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 8px 16px;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        border: none;
-        outline: none;
-        border-radius: 0;
-        cursor: pointer;
-        font-size: 14px;
-      }
+  .theme-switch {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: none;
+    outline: none;
+    border-radius: 0;
+    cursor: pointer;
+    font-size: 14px;
+  }
 
-      .theme-switch:hover {
-        background-color: var(--hover-bg);
-        color: var(--hover-text);
-      }
+  .theme-switch:hover {
+    background-color: var(--hover-bg);
+    color: var(--hover-text);
+  }
 
-      .container {
-        background-color: var(--bg-color);
-        padding: 30px;
-        border: none;
-        outline: none;
-        border-radius: 0;
-        width: 100%;
-        max-width: 400px;
-        text-align: center;
-        box-shadow: none;
-      }
+  .container {
+    background-color: var(--bg-color);
+    padding: 30px;
+    border: none;
+    outline: none;
+    border-radius: 0;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: none;
+  }
 
-      .container:hover {
-        background-color: var(--text-color);
-      }
+  .container:hover {
+    background-color: var(--text-color);
+  }
 
-      .container:hover .title {
-        color: var(--bg-color);
-      }
+  .container:hover .title {
+    color: var(--bg-color);
+  }
 
-      .container:hover .divider {
-        color: var(--bg-color);
-      }
+  .container:hover .divider {
+    color: var(--bg-color);
+  }
 
-      .container:hover .divider::before,
-      .container:hover .divider::after {
-        border-bottom: 1px solid var(--bg-color);
-      }
+  .container:hover .divider::before,
+  .container:hover .divider::after {
+    border-bottom: 1px solid var(--bg-color);
+  }
 
-      .container:hover .google-btn {
-        background-color: var(--text-color);
-        color: var(--bg-color);
-      }
+  .container:hover .google-btn {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+  }
 
-      .container:hover .google-btn:hover {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-      }
+  .container:hover .google-btn:hover {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
 
-      .container:hover input[type="text"] {
-        background-color: var(--text-color);
-        color: var(--bg-color);
-      }
+  .container:hover input[type="text"] {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+  }
 
-      .container:hover input[type="text"]:hover,
-      .container:hover input[type="text"]:focus {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-      }
+  .container:hover input[type="text"]:hover,
+  .container:hover input[type="text"]:focus {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
 
-      .container:hover input[type="text"]:hover::placeholder,
-      .container:hover input[type="text"]:focus::placeholder {
-        color: var(--text-color);
-      }
+  .container:hover input[type="text"]:hover::placeholder,
+  .container:hover input[type="text"]:focus::placeholder {
+    color: var(--text-color);
+  }
 
-      .container:hover input[type="text"]::placeholder {
-        color: var(--bg-color);
-      }
+  .container:hover input[type="text"]::placeholder {
+    color: var(--bg-color);
+  }
 
-      .container:hover .guest-btn {
-        background-color: var(--text-color);
-        color: var(--bg-color);
-      }
+  .container:hover .guest-btn {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+  }
 
-      .container:hover .guest-btn:hover {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-      }
+  .container:hover .guest-btn:hover {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
 
-      .title {
-        color: var(--text-color);
-        font-size: 24px;
-        margin-bottom: 30px;
-      }
+  .title {
+    color: var(--text-color);
+    font-size: 24px;
+    margin-bottom: 30px;
+  }
 
-      .divider {
-        display: flex;
-        align-items: center;
-        margin: 20px 0;
-        color: var(--text-color);
-      }
+  .divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    color: var(--text-color);
+  }
 
-      .divider::before,
-      .divider::after {
-        content: "";
-        flex: 1;
-        border-bottom: 1px solid var(--text-color);
-      }
+  .divider::before,
+  .divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid var(--text-color);
+  }
 
-      .divider::before {
-        margin-right: 10px;
-      }
+  .divider::before {
+    margin-right: 10px;
+  }
 
-      .divider::after {
-        margin-left: 10px;
-      }
+  .divider::after {
+    margin-left: 10px;
+  }
 
-      .google-btn {
-        width: 100%;
-        padding: 12px;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        border: none;
-        outline: none;
-        border-radius: 0;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: bold;
-        margin-bottom: 20px;
-      }
+  .google-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: none;
+    outline: none;
+    border-radius: 0;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
 
-      .google-btn:hover {
-        background-color: var(--text-color);
-        color: var(--bg-color);
-      }
+  .google-btn:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+  }
 
-      form {
-        width: 100%;
-      }
+  form {
+    width: 100%;
+  }
 
-      .form-group {
-        margin-bottom: 20px;
-        text-align: left;
-      }
+  .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
 
-      .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: var(--text-color);
-        font-size: 16px;
-      }
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-size: 16px;
+  }
 
-      input[type="text"] {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        outline: none;
-        border-radius: 0;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        font-size: 16px;
-        box-sizing: border-box;
-      }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    outline: none;
+    border-radius: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-size: 16px;
+    box-sizing: border-box;
+  }
 
-      input[type="text"]:hover,
-      input[type="text"]:focus {
-        background-color: var(--text-color);
-        color: var(--bg-color);
-      }
+  input[type="text"]:hover,
+  input[type="text"]:focus {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+  }
 
-      input[type="text"]:hover::placeholder,
-      input[type="text"]:focus::placeholder {
-        color: var(--bg-color);
-      }
+  input[type="text"]:hover::placeholder,
+  input[type="text"]:focus::placeholder {
+    color: var(--bg-color);
+  }
 
-      input[type="text"]::placeholder {
-        color: var(--text-color);
-      }
+  input[type="text"]::placeholder {
+    color: var(--text-color);
+  }
 
-      .guest-btn {
-        width: 100%;
-        padding: 12px;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        border: none;
-        outline: none;
-        border-radius: 0;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: bold;
-      }
+  .guest-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: none;
+    outline: none;
+    border-radius: 0;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+  }
 
-      .guest-btn:hover {
-        background-color: var(--text-color);
-        color: var(--bg-color);
-      }
+  .guest-btn:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+  }
 
-      .disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
+  .disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
-      .timestamp {
-        font-size: 12px;
-        color: var(--text-color);
-      }
+  .timestamp {
+    font-size: 12px;
+    color: var(--text-color);
+  }
 
-      .grecaptcha-badge {
-        filter: grayscale(100%) !important;
-        opacity: 0.8 !important;
-      }
+  .grecaptcha-badge {
+    filter: grayscale(100%) !important;
+    opacity: 0.8 !important;
+  }
 
-      @media (max-width: 700px) {
-        .container {
-          padding: 10px;
-          max-width: 80vw;
-        }
-        .title {
-          font-size: 18px;
-        }
-        .google-btn,
-        .guest-btn {
-          font-size: 13px;
-          padding: 10px;
-        }
-        .divider {
-          font-size: 13px;
-        }
-        input[type="text"] {
-          font-size: 13px;
-          padding: 10px;
-        }
-        .theme-switch {
-          width: 48vw;
-          min-width: 100px;
-          max-width: 200px;
-          height: 48px;
-          font-size: 13px;
-        }
-      }
-    </style>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <script>
-      function onSubmit(token) {
-        const usernameInputDom = document.querySelector(
-          "#choose-username-input"
-        );
-        const username = usernameInputDom.value;
-        if (username.trim()) {
-          document.getElementById("username-form").submit();
-          usernameInputDom.value = "";
-        } else {
-          grecaptcha.reset();
-        }
-      }
-    </script>
-  </head>
-  <body>
-    <button class="theme-switch" onclick="toggleTheme()">Toggle Theme</button>
-    <div class="container">
-      <div class="title" style="font-weight: bold">MEET AND CHAT</div>
-      <button class="google-btn disabled" type="submit">
-        Log in with Google
-      </button>
-      <div class="divider">or</div>
-      <form method="POST" action="{% url 'choose' %}" id="username-form">
-        {% csrf_token %}
-        <div class="form-group">
-          <input
-            id="choose-username-input"
-            name="username"
-            type="text"
-            placeholder="Enter your username"
-            required
-          />
-        </div>
-        <button
-          class="guest-btn g-recaptcha"
-          data-sitekey="6LfQgDUrAAAAAKFQ1Aw_5CMSYZwsuC6b3u-1g-a_"
-          id="choose-name-submit"
-          data-callback="onSubmit"
-        >
-          Join as guest
-        </button>
-      </form>
+  @media (max-width: 700px) {
+    .container {
+      padding: 10px;
+      max-width: 80vw;
+    }
+    .title {
+      font-size: 18px;
+    }
+    .google-btn,
+    .guest-btn {
+      font-size: 13px;
+      padding: 10px;
+    }
+    .divider {
+      font-size: 13px;
+    }
+    input[type="text"] {
+      font-size: 13px;
+      padding: 10px;
+    }
+    .theme-switch {
+      width: 48vw;
+      min-width: 100px;
+      max-width: 200px;
+      height: 48px;
+      font-size: 13px;
+    }
+  }
+</style>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+  function onSubmit(token) {
+    const usernameInputDom = document.querySelector("#choose-username-input");
+    const username = usernameInputDom.value;
+    if (username.trim()) {
+      document.getElementById("username-form").submit();
+      usernameInputDom.value = "";
+    } else {
+      grecaptcha.reset();
+    }
+  }
+</script>
+<button class="theme-switch" onclick="toggleTheme()">Toggle Theme</button>
+<div class="container">
+  <div class="title" style="font-weight: bold">MEET AND CHAT</div>
+  <button class="google-btn disabled" type="submit">Log in with Google</button>
+  <div class="divider">or</div>
+  <form method="POST" action="{% url 'choose' %}" id="username-form">
+    {% csrf_token %}
+    <div class="form-group">
+      <input
+        id="choose-username-input"
+        name="username"
+        type="text"
+        placeholder="Enter your username"
+        required
+      />
     </div>
+    <button
+      class="guest-btn g-recaptcha"
+      data-sitekey="6LfQgDUrAAAAAKFQ1Aw_5CMSYZwsuC6b3u-1g-a_"
+      id="choose-name-submit"
+      data-callback="onSubmit"
+    >
+      Join as guest
+    </button>
+  </form>
+</div>
 
-    <script>
-      function toggleTheme() {
-        const root = document.documentElement;
-        const currentTheme = root.getAttribute("data-theme");
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-        root.setAttribute("data-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-      }
-
-      // Set initial theme from localStorage or default to dark
-      document.addEventListener("DOMContentLoaded", () => {
-        const savedTheme = localStorage.getItem("theme") || "dark";
-        document.documentElement.setAttribute("data-theme", savedTheme);
-      });
-    </script>
-  </body>
-</html>
+{% endblock %}
