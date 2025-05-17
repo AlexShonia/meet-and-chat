@@ -1,0 +1,350 @@
+<style>
+  :root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --container-bg: #ffffff;
+    --border-color: #000000;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --hover-bg: #000000;
+    --hover-text: #ffffff;
+  }
+
+  [data-theme="dark"] {
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --container-bg: #000000;
+    --border-color: #ffffff;
+    --shadow-color: rgba(255, 255, 255, 0.1);
+    --hover-bg: #ffffff;
+    --hover-text: #000000;
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: "Roboto Mono", monospace;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  * {
+    font-family: "Roboto Mono", monospace;
+  }
+
+  .theme-switch {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: none;
+    outline: none;
+    border-radius: 0;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .theme-switch:hover {
+    background-color: var(--hover-bg);
+    color: var(--hover-text);
+  }
+
+  #chat-messages {
+    height: 400px;
+    overflow-y: auto;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: "Roboto Mono", monospace;
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-color) var(--bg-color);
+  }
+
+  #chat-messages::-webkit-scrollbar {
+    width: 18px;
+    background: transparent;
+  }
+
+  #chat-messages::-webkit-scrollbar-track {
+    background: var(--bg-color);
+    border-radius: 0;
+  }
+
+  #chat-messages::-webkit-scrollbar-thumb {
+    background-color: var(--text-color);
+    border-radius: 0;
+    border: 5px solid transparent;
+    background-clip: padding-box;
+    min-height: 40px;
+  }
+
+  #chat-messages::-webkit-scrollbar-button {
+    display: none;
+    height: 0;
+    width: 0;
+  }
+
+  /* Firefox */
+  #chat-messages {
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-color) var(--bg-color);
+  }
+
+  .message-container {
+    margin-bottom: 8px;
+  }
+
+  .user-name {
+    color: var(--text-color);
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  .message {
+    color: var(--text-color);
+  }
+
+  .system-message {
+    color: #808080;
+    font-style: italic;
+    margin: 8px 0;
+  }
+
+  .input-container {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    align-items: center;
+  }
+
+  #chat-message-input {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    outline: none;
+    border-radius: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+
+  #chat-message-input:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+  }
+
+  #chat-message-input:hover::placeholder {
+    color: var(--bg-color);
+  }
+
+  #chat-message-input:focus {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    outline: none;
+  }
+
+  #chat-message-input:focus::placeholder {
+    color: var(--bg-color);
+  }
+
+  #chat-message-input::placeholder {
+    color: var(--text-color);
+  }
+
+  #chat-message-submit {
+    padding: 8px 16px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: none;
+    outline: none;
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  #chat-message-submit:hover {
+    background-color: var(--hover-bg);
+    color: var(--hover-text);
+  }
+
+  .chat-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+  }
+
+  .status-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    justify-content: flex-start;
+  }
+
+  #next-person-btn {
+    padding: 8px 16px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: none;
+    outline: none;
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  #next-person-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--hover-text);
+  }
+
+  #go-back-btn {
+    padding: 8px 16px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: none;
+    outline: none;
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  #go-back-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--hover-text);
+  }
+
+  .timestamp {
+    font-size: 12px;
+    color: var(--text-color);
+  }
+
+  #status {
+    font-size: 13px;
+    text-align: left;
+    flex: 1;
+  }
+
+  .audio-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .audio-toggle svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .audio-toggle svg path {
+    fill: var(--text-color);
+  }
+
+  @media (max-width: 700px) {
+    .chat-container {
+      padding: 8px;
+      padding-top: 25px;
+      max-width: 100vw;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 40px);
+    }
+    .status-container {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    #chat-messages {
+      height: auto;
+      flex: 1;
+      padding: 8px;
+    }
+    #chat-message-input,
+    #chat-message-submit,
+    #next-person-btn,
+    #go-back-btn {
+      font-size: 13px;
+      padding: 10px;
+      height: 38px;
+    }
+    .theme-switch {
+      width: 48vw;
+      min-width: 100px;
+      max-width: 200px;
+      height: 48px;
+      font-size: 13px;
+    }
+    #status {
+      text-align: left;
+      width: 100%;
+      padding: 10px;
+      font-size: 13px;
+    }
+    .input-container {
+      position: sticky;
+      bottom: 0;
+      background-color: var(--bg-color);
+      padding: 8px;
+      margin-top: auto;
+    }
+  }
+</style>
+{% load static %}
+<button class="theme-switch" onclick="toggleTheme()">Toggle Theme</button>
+<audio
+  id="match-sound"
+  src="{% static 'meet_n_chat/audio/8bit-match-notification.mp3' %}"
+  preload="auto"
+></audio>
+<div class="chat-container">
+  <div class="status-container">
+    <button id="go-back-btn">Go Back</button>
+    <button id="next-person-btn">Next Person</button>
+    <div id="status">Searching...</div>
+  </div>
+  <div id="chat-messages"></div>
+  <div class="input-container">
+    <label
+      for="myFile"
+      class="upload-icon"
+      style="cursor: pointer; display: inline-block; width: 24px; height: 24px"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 16 16"
+        style="fill: var(--text-color)"
+      >
+        <path
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M1 1H15V15H1V1ZM6 9L8 11L13 6V13H3V12L6 9ZM6.5 7C7.32843 7 8 6.32843 8 5.5C8 4.67157 7.32843 4 6.5 4C5.67157 4 5 4.67157 5 5.5C5 6.32843 5.67157 7 6.5 7Z"
+        />
+      </svg>
+    </label>
+    <input
+      type="file"
+      id="myFile"
+      name="filename"
+      accept="image/*"
+      style="display: none"
+    />
+    <input
+      id="chat-message-input"
+      type="text"
+      placeholder="Type your message..."
+    />
+    <input id="chat-message-submit" type="button" value="Send" />
+  </div>
+  {% csrf_token %}
+</div>

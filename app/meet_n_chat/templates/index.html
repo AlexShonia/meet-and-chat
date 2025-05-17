@@ -47,7 +47,6 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        transition: background-color 0.3s, color 0.3s;
       }
 
       * {
@@ -66,7 +65,6 @@
         border-radius: 0;
         cursor: pointer;
         font-size: 14px;
-        transition: all 0.2s;
       }
 
       .theme-switch:hover {
@@ -84,11 +82,6 @@
         max-width: 400px;
         text-align: center;
         box-shadow: none;
-        transition: all 0.1s ease;
-      }
-
-      .container * {
-        transition: all 0.1s ease;
       }
 
       .container:hover {
@@ -320,10 +313,10 @@
     <button class="theme-switch" onclick="toggleTheme()">Toggle Theme</button>
     <div class="container">
       <div class="title" style="font-weight: bold">MEET AND CHAT</div>
-      <!-- <button class="google-btn disabled" type="submit">
+      <button class="google-btn disabled" type="submit">
         Log in with Google
       </button>
-      <div class="divider">or</div> -->
+      <div class="divider">or</div>
       <form method="POST" action="{% url 'choose' %}" id="username-form">
         {% csrf_token %}
         <div class="form-group">

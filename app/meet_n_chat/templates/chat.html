@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include "components/chat-box.html" %}
+<script>
+  function toggleTheme() {
+    const root = document.documentElement;
+    const currentTheme = root.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+  }
+
+  // Set initial theme from localStorage or default to dark
+  document.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  });
+
+  const matchSound = document.getElementById("match-sound");
+  matchSound.volume = 0.3;
+
+  const ws_scheme = window.location.protocol === "https:" ? "wss://" : "ws://";
+
+  const chatSocket = new WebSocket(
+    ws_scheme + window.location.host + "/ws/chat/"
+  );
+
+  chatSocket.onmessage = function (e) {
+    const data = JSON.parse(e.data);
+    const message = data.message;
+    const user = data.user;
+    const event = data.event;
+    const chat_color = data.chat_color;
+    switch (event) {
+      case "message":
+        document.querySelector(
+          "#chat-messages"
+        ).innerHTML += `<div class="message-container">
+                <span class="user-name" style="color: ${chat_color}">${user}:</span>
+                <span class="message">${message}</span>
+              </div>`;
+        break;
+      case "join":
+        matchSound.play();
+        document.querySelector(
+          "#chat-messages"
+        ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> joined the chat</div>`;
+        document.querySelector(
+          "#status"
+        ).innerHTML = `You were paired, say hi!`;
+        break;
+      case "leave":
+        document.querySelector(
+          "#chat-messages"
+        ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> left the chat</div>`;
+        document.querySelector("#status").innerHTML = `${user} left the chat`;
+        break;
+      case "searching":
+        document.querySelector("#status").innerHTML = "Searching...";
+        break;
+      case "image":
+        const imgContainer = document.createElement("div");
+        imgContainer.className = "message-container";
+        imgContainer.innerHTML = `<span class="user-name" style="color: ${chat_color}">${user}:</span>
+              <img src="${window.location.origin}${message}" style="max-width: 300px; max-height: 300px; object-fit: contain;"></img>`;
+        document.querySelector("#chat-messages").appendChild(imgContainer);
+        const img = imgContainer.querySelector("img");
+        img.onload = function () {
+          const chatLog = document.querySelector("#chat-messages");
+          chatLog.scrollTop = chatLog.scrollHeight;
+        };
+        break;
+    }
+    // Auto scroll to bottom
+    const chatLog = document.querySelector("#chat-messages");
+    if (event !== "image") {
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+  };
+
+  chatSocket.onclose = function (e) {
+    console.error("Chat socket closed unexpectedly");
+  };
+
+  document.querySelector("#next-person-btn").onclick = function (e) {
+    window.location.reload();
+  };
+
+  document.querySelector("#go-back-btn").onclick = function (e) {
+    window.history.back();
+  };
+
+  document.querySelector("#chat-message-input").focus();
+  document.querySelector("#chat-message-input").onkeyup = function (e) {
+    if (e.key === "Enter") {
+      document.querySelector("#chat-message-submit").click();
+    }
+  };
+
+  document.querySelector("#chat-message-submit").onclick = function (e) {
+    const messageInputDom = document.querySelector("#chat-message-input");
+    const message = messageInputDom.value;
+    if (message.trim()) {
+      chatSocket.send(
+        JSON.stringify({
+          message: message,
+          type: "message",
+        })
+      );
+      messageInputDom.value = "";
+    }
+  };
+
+  document.getElementById("myFile").addEventListener("change", function (e) {
+    if (this.files && this.files[0]) {
+      const formData = new FormData();
+      formData.append("filename", this.files[0]);
+      formData.append(
+        "csrfmiddlewaretoken",
+        document.querySelector("[name=csrfmiddlewaretoken]").value
+      );
+
+      fetch("{% url 'upload_image'%}", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+            .value,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.file) {
+            chatSocket.send(
+              JSON.stringify({
+                message: data.file,
+                type: "image",
+              })
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+  });
+
+  function toggleAudio() {
+    const audioToggle = document.getElementById("audio-toggle");
+    const isMuted = audioToggle.getAttribute("data-muted") === "true";
+
+    if (isMuted) {
+      audioToggle.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800px" height="800px" viewBox="0 0 16 16" fill="none">
+              <path d="M6 1H8V15H6L2 11H0V5H2L6 1Z" fill="#000000"/>
+              <path d="M14 8C14 5.79086 12.2091 4 10 4V2C13.3137 2 16 4.68629 16 8C16 11.3137 13.3137 14 10 14V12C12.2091 12 14 10.2091 14 8Z" fill="#000000"/>
+              <path d="M12 8C12 9.10457 11.1046 10 10 10V6C11.1046 6 12 6.89543 12 8Z" fill="#000000"/>
+            </svg>
+          `;
+      audioToggle.setAttribute("data-muted", "false");
+      matchSound.volume = 0.3;
+    } else {
+      audioToggle.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="800px" height="800px" viewBox="0 0 16 16" fill="none">
+              <path d="M8 1H6L2 5H0V11H2L6 15H8V1Z" fill="#000000"/>
+              <path d="M9.29289 6.20711L11.0858 8L9.29289 9.79289L10.7071 11.2071L12.5 9.41421L14.2929 11.2071L15.7071 9.79289L13.9142 8L15.7071 6.20711L14.2929 4.79289L12.5 6.58579L10.7071 4.79289L9.29289 6.20711Z" fill="#000000"/>
+            </svg>
+          `;
+      audioToggle.setAttribute("data-muted", "true");
+      matchSound.volume = 0;
+    }
+  }
+</script>
+
+{% endblock %}

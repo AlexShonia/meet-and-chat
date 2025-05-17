@@ -10,7 +10,7 @@ from rest_framework.parsers import MultiPartParser
 
 class IndexView(APIView):
     def get(self, request):
-        return render(request, "index/index.html")
+        return render(request, "index.html")
 
 
 class ChooseView(APIView):
@@ -23,7 +23,7 @@ class ChooseView(APIView):
         request.session["username"] = username
         request.session["user_id"] = uuid4().hex
 
-        return render(request, "chat/choose.html")
+        return render(request, "choose.html")
 
 
 class ChatView(APIView):
@@ -31,7 +31,7 @@ class ChatView(APIView):
         username = request.session.get("username")
         if not username:
             return redirect("index")
-        return render(request, "chat/chat.html")
+        return render(request, "chat.html")
 
 
 class FileUploadView(APIView):
@@ -63,4 +63,4 @@ class VoiceChatView(APIView):
 
         if not username:
             return redirect("index")
-        return render(request, "chat/voice-chat.html", {"user_id": user_id})
+        return render(request, "voice-chat.html", {"user_id": user_id})

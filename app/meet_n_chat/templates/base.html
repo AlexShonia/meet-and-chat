@@ -3,9 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       :root {
         --bg-color: #ffffff;
@@ -22,23 +25,41 @@
       body {
         margin: 0;
         padding: 0;
-        font-family: 'Roboto Mono', monospace;
+        font-family: "Roboto Mono", monospace;
         background-color: var(--bg-color);
         color: var(--text-color);
-        transition: all 0.3s;
       }
 
       * {
-        box-sizing: border-box;
         margin: 0;
         padding: 0;
         border: none;
         outline: none;
-        font-family: 'Roboto Mono', monospace;
+        font-family: "Roboto Mono", monospace;
       }
     </style>
+    <script>
+      // Immediately set theme before page renders
+      const savedTheme = localStorage.getItem("theme") || "dark";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    </script>
   </head>
   <body>
     {% block content %}{% endblock %}
   </body>
-</html> 
+  <script>
+    function toggleTheme() {
+      const root = document.documentElement;
+      const currentTheme = root.getAttribute("data-theme");
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+    }
+
+    // Set initial theme from localStorage or default to dark
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("theme") || "dark";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    });
+  </script>
+</html>
