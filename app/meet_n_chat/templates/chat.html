@@ -1,7 +1,6 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %} {% include
+"components/chat-box.html" %}
 
-{% block content %}
-{% include "components/chat-box.html" %}
 <script>
   function toggleTheme() {
     const root = document.documentElement;
@@ -22,6 +21,10 @@
 
   const ws_scheme = window.location.protocol === "https:" ? "wss://" : "ws://";
 
+  let chatColor = "#FF6B6B";
+  let chatStarted = false;
+  const controlBtn = document.querySelector("#control-btn");
+
   const chatSocket = new WebSocket(
     ws_scheme + window.location.host + "/ws/chat/"
   );
@@ -41,21 +44,33 @@
                 <span class="message">${message}</span>
               </div>`;
         break;
-      case "join":
+      case "start":
+        chatStarted = true;
+        document.querySelector("#status").innerHTML = "Searching...";
+        chatColor = chat_color;
+        controlBtn.textContent = "Stop";
+        break;
+      case "stop":
+        chatStarted = false;
+        chatColor = chat_color;
+        controlBtn.textContent = "Start";
+
         matchSound.play();
+        document.querySelector(
+          "#chat-messages"
+        ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> left the chat</div>`;
+        document.querySelector("#status").innerHTML = `${user} left the chat`;
+        break;
+      case "join":
+        chatStarted = true;
+        matchSound.play();
+        document.querySelector("#chat-messages").innerHTML = "";
         document.querySelector(
           "#chat-messages"
         ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> joined the chat</div>`;
         document.querySelector(
           "#status"
         ).innerHTML = `You were paired, say hi!`;
-        break;
-      case "leave":
-        matchSound.play();
-        document.querySelector(
-          "#chat-messages"
-        ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> left the chat</div>`;
-        document.querySelector("#status").innerHTML = `${user} left the chat`;
         break;
       case "searching":
         document.querySelector("#status").innerHTML = "Searching...";
@@ -82,10 +97,6 @@
 
   chatSocket.onclose = function (e) {
     console.error("Chat socket closed unexpectedly");
-  };
-
-  document.querySelector("#next-person-btn").onclick = function (e) {
-    window.location.reload();
   };
 
   document.querySelector("#go-back-btn").onclick = function (e) {
@@ -170,6 +181,23 @@
           `;
       audioToggle.setAttribute("data-muted", "true");
       matchSound.volume = 0;
+    }
+  }
+
+  function queueController() {
+    if (chatStarted) {
+      chatSocket.send(
+        JSON.stringify({
+          type: "stop",
+        })
+      );
+    } else {
+      chatSocket.send(
+        JSON.stringify({
+          type: "start",
+        })
+      );
+      controlBtn.textContent = "Stop";
     }
   }
 </script>

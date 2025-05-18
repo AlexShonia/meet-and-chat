@@ -1,6 +1,5 @@
 {% extends "base.html" %} {% block content %} {{ user_id|json_script:"user-id"}}
 {% include "components/chat-box.html" with voice_chat=True %}
-<button onclick="makeCall()">make call</button>
 <script>
   class SoundMeter {
     constructor(context) {
@@ -163,6 +162,7 @@
       case "join":
         chatStarted = true;
         matchSound.play();
+        document.querySelector("#chat-messages").innerHTML = "";
         document.querySelector(
           "#chat-messages"
         ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> joined the chat</div>`;
@@ -174,7 +174,6 @@
         ).innerHTML = `You were paired, say hi!`;
 
         msgUserID = messageUserID;
-        await new Promise((r) => setTimeout(r, 500));
         await makeCall();
         break;
       case "image":
@@ -214,30 +213,25 @@
     chatSocket.onmessage = async (e) => {
       const data = JSON.parse(e.data);
 
-      console.log("on message is ran", data);
-
       if (data?.answer && amCaller) {
         await peerConnection.setRemoteDescription(data.answer);
         remoteDescriptionSet = true;
 
         for (const candidate of pendingCandidates) {
-          console.log("adding buffer candidates");
           await peerConnection.addIceCandidate(candidate);
         }
         pendingCandidates = [];
       }
 
       if (data?.offer && !amCaller) {
-        console.log("got the offer");
         await peerConnection.setRemoteDescription(data.offer);
         remoteDescriptionSet = true;
 
         const answer = await peerConnection.createAnswer();
-        chatSocket.send(JSON.stringify({ answer: answer }));
+        chatSocket.send(JSON.stringify({ type: "answer", answer: answer }));
         await peerConnection.setLocalDescription(answer);
 
         for (const candidate of pendingCandidates) {
-          console.log("adding buffer candidates");
           await peerConnection.addIceCandidate(candidate);
         }
         pendingCandidates = [];
@@ -246,8 +240,6 @@
       if (data?.iceCandidate) {
         if (remoteDescriptionSet) {
           try {
-            console.log("adding candidates");
-
             await peerConnection.addIceCandidate(data.iceCandidate);
           } catch (e) {
             console.error("Error adding received ICE candidate", e);
@@ -262,7 +254,7 @@
 
     peerConnection.onconnectionstatechange = (event) => {
       if (peerConnection.connectionState === "connected") {
-        console.log("WE GOT CONNECTED");
+        // Maybe show somehow in UI
       }
     };
 
@@ -281,7 +273,10 @@
     peerConnection.addEventListener("icecandidate", (event) => {
       if (event.candidate) {
         chatSocket.send(
-          JSON.stringify({ "new-ice-candidate": event.candidate })
+          JSON.stringify({
+            type: "ice_candidate",
+            "new-ice-candidate": event.candidate,
+          })
         );
       }
     });
@@ -290,7 +285,7 @@
       await new Promise((r) => setTimeout(r, 100));
       const offer = await peerConnection.createOffer();
 
-      chatSocket.send(JSON.stringify({ offer: offer }));
+      chatSocket.send(JSON.stringify({ type: "offer", offer: offer }));
       await peerConnection.setLocalDescription(offer);
     }
   }
@@ -304,10 +299,6 @@
   chatSocket.onclose = function (e) {
     console.error("Chat socket closed unexpectedly");
   };
-
-  // document.querySelector("#next-person-btn").onclick = function (e) {
-  //   window.location.reload();
-  // };
 
   document.querySelector("#go-back-btn").onclick = function (e) {
     window.history.back();
