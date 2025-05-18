@@ -67,6 +67,9 @@
   let localAudioTrack;
   let chatColor = "#FF6B6B";
   let msgUserID;
+  let chatStarted = false;
+  let peerConnection;
+  const controlBtn = document.querySelector("#control-btn");
 
   const chatSocket = new WebSocket(
     ws_scheme + window.location.host + "/ws/voice-chat/"
@@ -126,6 +129,7 @@
 
     switch (event) {
       case "message":
+        chatColor = chat_color;
         document.querySelector(
           "#chat-messages"
         ).innerHTML += `<div class="message-container">
@@ -133,7 +137,31 @@
                 <span class="message">${message}</span>
               </div>`;
         break;
+      case "info":
+        chatColor = chat_color;
+        break;
+      case "start":
+        chatStarted = true;
+        document.querySelector("#status").innerHTML = "Searching...";
+        chatColor = chat_color;
+        controlBtn.textContent = "Stop";
+        break;
+      case "stop":
+        peerConnection.close();
+        peerConnection = null;
+        chatStarted = false;
+        chatColor = chat_color;
+        controlBtn.textContent = "Start";
+
+        matchSound.play();
+        document.querySelector(
+          "#chat-messages"
+        ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> left the chat</div>`;
+        document.querySelector("#status").innerHTML = `${user} left the chat`;
+
+        break;
       case "join":
+        chatStarted = true;
         matchSound.play();
         document.querySelector(
           "#chat-messages"
@@ -148,17 +176,6 @@
         msgUserID = messageUserID;
         await new Promise((r) => setTimeout(r, 500));
         await makeCall();
-        break;
-      case "leave":
-        matchSound.play();
-        document.querySelector(
-          "#chat-messages"
-        ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> left the chat</div>`;
-        document.querySelector("#status").innerHTML = `${user} left the chat`;
-        break;
-      case "searching":
-        chatColor = chat_color;
-        document.querySelector("#status").innerHTML = "Searching...";
         break;
       case "image":
         const imgContainer = document.createElement("div");
@@ -189,7 +206,7 @@
         { urls: "stun:stun3.l.google.com:19302" },
       ],
     };
-    const peerConnection = new RTCPeerConnection(configuration);
+    peerConnection = new RTCPeerConnection(configuration);
 
     let pendingCandidates = [];
     let remoteDescriptionSet = false;
@@ -288,9 +305,9 @@
     console.error("Chat socket closed unexpectedly");
   };
 
-  document.querySelector("#next-person-btn").onclick = function (e) {
-    window.location.reload();
-  };
+  // document.querySelector("#next-person-btn").onclick = function (e) {
+  //   window.location.reload();
+  // };
 
   document.querySelector("#go-back-btn").onclick = function (e) {
     window.history.back();
@@ -438,6 +455,23 @@
       if (remoteAudio) {
         remoteAudio.volume = 0;
       }
+    }
+  }
+
+  function queueController() {
+    if (chatStarted) {
+      chatSocket.send(
+        JSON.stringify({
+          type: "stop",
+        })
+      );
+    } else {
+      chatSocket.send(
+        JSON.stringify({
+          type: "start",
+        })
+      );
+      controlBtn.textContent = "Stop";
     }
   }
 </script>

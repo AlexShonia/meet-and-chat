@@ -117,41 +117,51 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
         self.user_id = session.get("user_id")
         self.chat_color = pick_random_color()
 
-        user_id, group_name = await pop_voice_chat_queue()
-        if group_name and user_id != self.user_id:
-            self.room_group_name = group_name
+        # user_id, group_name = await pop_voice_chat_queue()
+        # if group_name and user_id != self.user_id:
+        #     self.room_group_name = group_name
 
-            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-            await self.accept()
+        #     await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        #     await self.accept()
 
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "voice.chat.message",
-                    "message": "",
-                    "user": self.username,
-                    "user_id": self.user_id,
-                    "event": "join",
-                    "chat_color": self.chat_color,
-                },
-            )
-        else:
-            self.room_group_name = f"chat_{uuid4().hex}"
-            await add_voice_chat_queue(self.room_group_name, self.user_id)
+            # await self.channel_layer.group_send(
+            #     self.room_group_name,
+            #     {
+            #         "type": "voice.chat.message",
+            #         "message": "",
+            #         "user": self.username,
+            #         "user_id": self.user_id,
+            #         "event": "join",
+            #         "chat_color": self.chat_color,
+            #     },
+            # )
+        # else:
+        #     await add_voice_chat_queue(self.room_group_name, self.user_id)
 
-            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-            await self.accept()
+        self.room_group_name = f"chat_{uuid4().hex}"
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "voice.chat.message",
+                "message": "",
+                "user": self.username,
+                "event": "info",
+                "chat_color": self.chat_color,
+            },
+        )
 
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "voice.chat.message",
-                    "message": "",
-                    "user": self.username,
-                    "event": "searching",
-                    "chat_color": self.chat_color,
-                },
-            )
+            # await self.channel_layer.group_send(
+            #     self.room_group_name,
+            #     {
+            #         "type": "voice.chat.message",
+            #         "message": "",
+            #         "user": self.username,
+            #         "event": "searching",
+            #         "chat_color": self.chat_color,
+            #     },
+            # )
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_send(
@@ -176,6 +186,58 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
         offer = text_data_json.get("offer")
         answer = text_data_json.get("answer")
         ice_candidate = text_data_json.get("new-ice-candidate")
+
+        if type == "start":
+            user_id, group_name = await pop_voice_chat_queue()
+            if group_name and user_id != self.user_id:
+                self.room_group_name = group_name
+                await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+                await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "voice.chat.message",
+                        "message": "",
+                        "user": self.username,
+                        "user_id": self.user_id,
+                        "event": "join",
+                        "chat_color": self.chat_color,
+                    },
+                )
+            else:
+                self.room_group_name = f"chat_{uuid4().hex}"
+                await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+                await add_voice_chat_queue(self.room_group_name, self.user_id)
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "voice.chat.message",
+                        "message": "",
+                        "user": self.username,
+                        "user_id": self.user_id,
+                        "event": "start",
+                        "chat_color": self.chat_color,
+                    },
+                )
+            return
+        elif type == "stop":
+            await delete_voice_chat_queue(self.user_id)
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "voice.chat.message",
+                    "message": "",
+                    "user": self.username,
+                    "user_id": self.user_id,
+                    "event": "stop",
+                    "chat_color": self.chat_color,
+                },
+            )
+            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+            self.room_group_name = f"chat_{uuid4().hex}"
+            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            return
+
 
         if offer:
             await self.channel_layer.group_send(

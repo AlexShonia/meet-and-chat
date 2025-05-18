@@ -163,7 +163,7 @@
     justify-content: flex-start;
   }
 
-  #next-person-btn {
+  #control-btn {
     padding: 8px 16px;
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -174,7 +174,7 @@
     white-space: nowrap;
   }
 
-  #next-person-btn:hover {
+  #control-btn:hover {
     background-color: var(--hover-bg);
     color: var(--hover-text);
   }
@@ -250,7 +250,7 @@
     }
     #chat-message-input,
     #chat-message-submit,
-    #next-person-btn,
+    #control-btn,
     #go-back-btn {
       font-size: 13px;
       padding: 10px;
@@ -285,8 +285,8 @@
 <div class="chat-container">
   <div class="status-container">
     <button id="go-back-btn">Go Back</button>
-    <button id="next-person-btn">Next Person</button>
-    <div id="status">Searching...</div>
+    <button id="control-btn" onclick="queueController()">Start</button>
+    <div id="status">Click Start</div>
     <button id="audio-toggle" class="audio-toggle" onclick="toggleAudio()">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -329,7 +329,7 @@
         <defs>
           <clipPath id="mic-clip">
             <!-- Fill bottom half: from y = 8 to y = 16 -->
-            <rect id="volume-fill" x="0" y="8" width="16" height="8" />
+            <rect id="volume-fill" x="0" y="16" width="16" height="8" />
           </clipPath>
         </defs>
 
