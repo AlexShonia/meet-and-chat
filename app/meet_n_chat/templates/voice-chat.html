@@ -212,6 +212,9 @@
         remoteDescriptionSet = true;
 
         const answer = await peerConnection.createAnswer();
+        chatSocket.send(
+          JSON.stringify({ answer: answer })
+        );
         await peerConnection.setLocalDescription(answer);
 
         for (const candidate of pendingCandidates) {
@@ -219,10 +222,6 @@
           await peerConnection.addIceCandidate(candidate);
         }
         pendingCandidates = [];
-
-        chatSocket.send(
-          JSON.stringify({ answer: peerConnection.localDescription })
-        );
       }
 
       if (data?.iceCandidate) {
@@ -271,11 +270,11 @@
     if (amCaller) {
       await new Promise((r) => setTimeout(r, 100));
       const offer = await peerConnection.createOffer();
-      await peerConnection.setLocalDescription(offer);
 
       chatSocket.send(
-        JSON.stringify({ offer: peerConnection.localDescription })
+        JSON.stringify({ offer: offer })
       );
+      await peerConnection.setLocalDescription(offer);
     }
   }
 
