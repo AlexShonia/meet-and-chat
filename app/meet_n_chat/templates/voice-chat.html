@@ -1,5 +1,6 @@
 {% extends "base.html" %} {% block content %} {{ user_id|json_script:"user-id"}}
 {% include "components/chat-box.html" with voice_chat=True %}
+<button onclick="makeCall()">make call</button>
 <script>
   class SoundMeter {
     constructor(context) {
@@ -61,6 +62,12 @@
 
   const ws_scheme = window.location.protocol === "https:" ? "wss://" : "ws://";
 
+  let remoteAudio;
+  let stream;
+  let localAudioTrack;
+  let chatColor = "#FF6B6B";
+  let msgUserID;
+
   const chatSocket = new WebSocket(
     ws_scheme + window.location.host + "/ws/voice-chat/"
   );
@@ -71,11 +78,6 @@
   const openMediaDevices = async (constraints) => {
     return await navigator.mediaDevices.getUserMedia(constraints);
   };
-
-  let remoteAudio;
-  let stream;
-  let localAudioTrack;
-  let chatColor = "#FF6B6B";
 
   (async () => {
     try {
@@ -143,7 +145,9 @@
           "#status"
         ).innerHTML = `You were paired, say hi!`;
 
-        await makeCall(messageUserID);
+        msgUserID = messageUserID;
+        await new Promise((r) => setTimeout(r, 500));
+        await makeCall();
         break;
       case "leave":
         matchSound.play();
@@ -175,8 +179,8 @@
       chatLog.scrollTop = chatLog.scrollHeight;
     }
   }
-  async function makeCall(messageUserID) {
-    const amCaller = userID != messageUserID;
+  async function makeCall() {
+    const amCaller = userID != msgUserID;
     const configuration = {
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },
@@ -212,9 +216,7 @@
         remoteDescriptionSet = true;
 
         const answer = await peerConnection.createAnswer();
-        chatSocket.send(
-          JSON.stringify({ answer: answer })
-        );
+        chatSocket.send(JSON.stringify({ answer: answer }));
         await peerConnection.setLocalDescription(answer);
 
         for (const candidate of pendingCandidates) {
@@ -271,9 +273,7 @@
       await new Promise((r) => setTimeout(r, 100));
       const offer = await peerConnection.createOffer();
 
-      chatSocket.send(
-        JSON.stringify({ offer: offer })
-      );
+      chatSocket.send(JSON.stringify({ offer: offer }));
       await peerConnection.setLocalDescription(offer);
     }
   }
