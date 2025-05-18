@@ -112,7 +112,7 @@
           fillRect.setAttribute("y", fillY);
           fillRect.setAttribute("height", fillHeight);
           fillPath.setAttribute("fill", chatColor);
-        }, 200);
+        }, 50);
       });
     } catch (error) {
       console.error("Error accessing media devices.", error);
@@ -146,7 +146,7 @@
         controlBtn.textContent = "Stop";
         break;
       case "stop":
-        peerConnection.close();
+        peerConnection?.close();
         peerConnection = null;
         chatStarted = false;
         chatColor = chat_color;
@@ -456,6 +456,7 @@
           type: "stop",
         })
       );
+      controlBtn.textContent = "Start";
     } else {
       chatSocket.send(
         JSON.stringify({
