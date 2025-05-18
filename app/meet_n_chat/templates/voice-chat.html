@@ -101,10 +101,9 @@
           const fillRect = document.getElementById("volume-fill");
           const fillPath = document.getElementById("volume-fill-color");
           const volume = soundMeter.instant;
-          const maxHeight = 16; // full SVG height
-          const fillHeight = Math.min(maxHeight, volume * 300); // scale volume
+          const maxHeight = 16;
+          const fillHeight = Math.min(maxHeight, volume * 200);
           const fillY = maxHeight - fillHeight;
-          console.log("does this running multiple? ");
 
           fillRect.setAttribute("y", fillY);
           fillRect.setAttribute("height", fillHeight);
@@ -215,15 +214,15 @@
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
 
-        chatSocket.send(
-          JSON.stringify({ answer: peerConnection.localDescription })
-        );
-
         for (const candidate of pendingCandidates) {
           console.log("adding buffer candidates");
           await peerConnection.addIceCandidate(candidate);
         }
         pendingCandidates = [];
+
+        chatSocket.send(
+          JSON.stringify({ answer: peerConnection.localDescription })
+        );
       }
 
       if (data?.iceCandidate) {
@@ -243,6 +242,12 @@
       await handleChatMessage(data);
     };
 
+    peerConnection.onconnectionstatechange = (event) => {
+      if (peerConnection.connectionState === "connected") {
+        console.log("WE GOT CONNECTED");
+      }
+    };
+
     remoteAudio = new Audio();
     remoteAudio.autoplay = true;
 
@@ -250,12 +255,6 @@
       const [remoteStream] = event.streams;
       remoteAudio.srcObject = remoteStream;
     });
-
-    peerConnection.onconnectionstatechange = (event) => {
-      if (peerConnection.connectionState === "connected") {
-        console.log("WE GOT CONNECTED");
-      }
-    };
 
     stream.getAudioTracks().forEach((track) => {
       peerConnection.addTrack(track, stream);
