@@ -1,0 +1,75 @@
+<style>
+
+  .modal-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+  .modal {
+    background: var(--text-color);
+    padding: 20px;
+    position: relative;
+    width: 300px;
+    max-width: 90%;
+  }
+
+
+  .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+  }
+
+  .modal-close:hover {
+  }
+
+  .open-modal-btn {
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #000000;
+    border: none;
+  }
+  p {
+    color: var(--bg-color);
+  }
+</style>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-close" onclick="closeModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <rect
+          transform="rotate(45)"
+          ry="0"
+          y="-1"
+          x="4.3137083"
+          height="2"
+          width="14"
+          style="fill: var(--bg-color)"
+        />
+        <rect
+          transform="rotate(-45)"
+          ry="0"
+          y="10.313708"
+          x="-7"
+          height="2"
+          width="14"
+          style="fill: var(--bg-color)"
+        />
+      </svg>
+    </div>
+    <p style="padding-top: 20px;">{{ modal_text }}</p>
+  </div>
+</div>

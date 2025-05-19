@@ -285,8 +285,13 @@
 ></audio>
 <div class="chat-container">
   <div class="status-container">
-    <button id="go-back-btn">Go Back</button>
-    <button id="control-btn" onclick="queueController()">Start</button>
+    <button
+      id="go-back-btn"
+      onclick="window.location.href='{% url 'choose' %}'"
+    >
+      Go Back
+    </button>
+    <button id="control-btn" onclick="this.blur(); queueController()">Start</button>
     <div id="status"></div>
     <button id="audio-toggle" class="audio-toggle" onclick="toggleAudio()">
       <svg

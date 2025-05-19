@@ -99,10 +99,6 @@
     console.error("Chat socket closed unexpectedly");
   };
 
-  document.querySelector("#go-back-btn").onclick = function (e) {
-    window.history.back();
-  };
-
   document.querySelector("#chat-message-input").focus();
   document.querySelector("#chat-message-input").onkeyup = function (e) {
     if (e.key === "Enter") {

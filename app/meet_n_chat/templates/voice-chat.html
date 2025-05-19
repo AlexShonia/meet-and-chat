@@ -1,5 +1,8 @@
 {% extends "base.html" %} {% block content %} {{ user_id|json_script:"user-id"}}
-{% include "components/chat-box.html" with voice_chat=True %}
+<main>
+{% include "components/chat-box.html" with voice_chat=True %} 
+</main>
+{% include "components/modal.html" with modal_text="Allow microphone to continue" %}
 <script>
   class SoundMeter {
     constructor(context) {
@@ -116,6 +119,7 @@
       });
     } catch (error) {
       console.error("Error accessing media devices.", error);
+      openModal();
     }
   })();
 
@@ -300,10 +304,6 @@
     console.error("Chat socket closed unexpectedly");
   };
 
-  document.querySelector("#go-back-btn").onclick = function (e) {
-    window.history.back();
-  };
-
   document.querySelector("#chat-message-input").focus();
   document.querySelector("#chat-message-input").onkeyup = function (e) {
     if (e.key === "Enter") {
@@ -466,5 +466,24 @@
       controlBtn.textContent = "Stop";
     }
   }
+
+  const overlay = document.getElementById("modalOverlay");
+
+  function openModal() {
+    document.getElementById("modalOverlay").style.display = "flex";
+    const main = document.querySelector('main');
+    main.setAttribute('inert', '');
+  }
+
+  function closeModal() {
+    document.getElementById("modalOverlay").style.display = "none";
+    window.location.href='{% url 'choose' %}'
+  }
+
+  overlay.addEventListener("click", function (e) {
+    if (e.target === overlay) {
+      closeModal();
+    }
+  });
 </script>
 {% endblock %}
