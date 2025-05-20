@@ -39,38 +39,6 @@
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: "Roboto Mono", monospace;
-    scrollbar-width: thin;
-    scrollbar-color: var(--text-color) var(--bg-color);
-  }
-
-  #chat-messages::-webkit-scrollbar {
-    width: 18px;
-    background: transparent;
-  }
-
-  #chat-messages::-webkit-scrollbar-track {
-    background: var(--bg-color);
-    border-radius: 0;
-  }
-
-  #chat-messages::-webkit-scrollbar-thumb {
-    background-color: var(--text-color);
-    border-radius: 0;
-    border: 5px solid transparent;
-    background-clip: padding-box;
-    min-height: 40px;
-  }
-
-  #chat-messages::-webkit-scrollbar-button {
-    display: none;
-    height: 0;
-    width: 0;
-  }
-
-  /* Firefox */
-  #chat-messages {
-    scrollbar-width: thin;
-    scrollbar-color: var(--text-color) var(--bg-color);
   }
 
   .message-container {
@@ -270,6 +238,10 @@
       padding: 8px;
       margin-top: auto;
     }
+
+    #history_container {
+      display: none;
+    }
   }
 
   #volume-fill {
@@ -283,6 +255,23 @@
   src="{% static 'meet_n_chat/audio/8bit-match-notification.mp3' %}"
   preload="auto"
 ></audio>
+<div
+  id="history_container"
+  
+  style="
+    top: 48px;
+    left: 60px;
+    width: 200px;
+    height: 475px;
+    position: fixed;
+    font-size: 14px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  "
+>
+  <span>History: </span>
+  <div id="history"></div>
+</div>
 <div class="chat-container">
   <div class="status-container">
     <button
@@ -291,7 +280,9 @@
     >
       Go Back
     </button>
-    <button id="control-btn" onclick="this.blur(); queueController()">Start</button>
+    <button id="control-btn" onclick="this.blur(); queueController()">
+      Start
+    </button>
     <div id="status"></div>
     <button id="audio-toggle" class="audio-toggle" onclick="toggleAudio()">
       <svg

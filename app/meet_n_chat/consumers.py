@@ -56,21 +56,40 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await handle_default(self, text_data_json, type)
 
     async def chat_message(self, event):
-        message = event["message"]
-        user = event["user"]
-        chat_event = event["event"]
-        chat_color = event["chat_color"]
+        message = event.get("message")
+        user = event.get("user")
+        user_id = event.get("user_id")
+        chat_event = event.get("event")
+        chat_color = event.get("chat_color")
+        second_user = event.get("second_user")
+        second_user_color = event.get("second_user_color")
 
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "message": message,
-                    "user": user,
-                    "event": chat_event,
-                    "chat_color": chat_color,
-                }
+        if second_user:
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "message": message,
+                        "user": user,
+                        "user_id": user_id,
+                        "second_user": second_user,
+                        "second_user_color": second_user_color,
+                        "event": chat_event,
+                        "chat_color": chat_color,
+                    }
+                )
             )
-        )
+        else:
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "message": message,
+                        "user": user,
+                        "user_id": user_id,
+                        "event": chat_event,
+                        "chat_color": chat_color,
+                    }
+                )
+            )
 
 
 class VoiceChatConsumer(AsyncWebsocketConsumer):
@@ -150,6 +169,8 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
         offer = event.get("offer")
         answer = event.get("answer")
         ice_candidate = event.get("iceCandidate")
+        second_user = event.get("second_user")
+        second_user_color = event.get("second_user_color")
 
         if offer:
             await self.send(
@@ -172,6 +193,20 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
                 text_data=json.dumps(
                     {
                         "iceCandidate": ice_candidate,
+                    }
+                )
+            )
+        elif second_user:
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "message": message,
+                        "user": user,
+                        "user_id": user_id,
+                        "second_user": second_user,
+                        "second_user_color": second_user_color,
+                        "event": chat_event,
+                        "chat_color": chat_color,
                     }
                 )
             )

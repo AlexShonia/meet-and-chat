@@ -10,16 +10,17 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 def pop_chat_queue():
     queue = ChatQueue.objects.all()
     if queue.count() > 0:
-        user_id = queue[0].user_id
-        group_name = queue[0].group_name
+        queue_row = queue.values()[0]
         queue[0].delete()
-        return (user_id, group_name)
-    return None, None
+        return queue_row
+    return {}
 
 
 @database_sync_to_async
-def add_chat_queue(room_group_name, user_id):
-    ChatQueue.objects.create(group_name=room_group_name, user_id=user_id)
+def add_chat_queue(room_group_name, user_id, username, chat_color):
+    ChatQueue.objects.create(
+        group_name=room_group_name, user_id=user_id, username=username, chat_color=chat_color
+    )
 
 
 @database_sync_to_async
@@ -31,16 +32,17 @@ def delete_chat_queue(user_id):
 def pop_voice_chat_queue():
     queue = VoiceChatQueue.objects.all()
     if queue.count() > 0:
-        user_id = queue[0].user_id
-        group_name = queue[0].group_name
+        queue_row = queue.values()[0]
         queue[0].delete()
-        return (user_id, group_name)
-    return None, None
+        return queue_row
+    return {}
 
 
 @database_sync_to_async
-def add_voice_chat_queue(room_group_name, user_id):
-    VoiceChatQueue.objects.create(group_name=room_group_name, user_id=user_id)
+def add_voice_chat_queue(room_group_name, user_id, username, chat_color):
+    VoiceChatQueue.objects.create(
+        group_name=room_group_name, user_id=user_id, username=username, chat_color=chat_color
+    )
 
 
 @database_sync_to_async
@@ -92,9 +94,14 @@ complementary_colors = [
 
 
 async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
-    user_id, group_name = (
+    queue_row = (
         await pop_voice_chat_queue() if consumer == "voice" else await pop_chat_queue()
     )
+    user_id = queue_row.get("user_id")
+    username = queue_row.get("username")
+    group_name = queue_row.get("group_name")
+    chat_color = queue_row.get("chat_color")
+
     if group_name and user_id != self.user_id:
         self.room_group_name = group_name
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
@@ -105,6 +112,8 @@ async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
                 "type": "chat.message",
                 "message": "",
                 "user": self.username,
+                "second_user": username,
+                "second_user_color": chat_color,
                 "user_id": self.user_id,
                 "event": "join",
                 "chat_color": self.chat_color,
@@ -114,9 +123,9 @@ async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
         self.room_group_name = f"chat_{uuid4().hex}"
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         (
-            await add_voice_chat_queue(self.room_group_name, self.user_id)
+            await add_voice_chat_queue(self.room_group_name, self.user_id, self.username, self.chat_color)
             if consumer == "voice"
-            else await add_chat_queue(self.room_group_name, self.user_id)
+            else await add_chat_queue(self.room_group_name, self.user_id, self.username, self.chat_color)
         )
         await self.channel_layer.group_send(
             self.room_group_name,

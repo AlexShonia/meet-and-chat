@@ -25,13 +25,18 @@ class ChooseView(APIView):
 
         return render(request, "choose.html")
 
+    def get(self, request: Request):
+        return render(request, "choose.html")
+
 
 class ChatView(APIView):
     def get(self, request: Request):
         username = request.session.get("username")
-        if not username:
+        user_id = request.session.get("user_id")
+
+        if not username or not user_id:
             return redirect("index")
-        return render(request, "chat.html")
+        return render(request, "chat.html", {"user_id": user_id})
 
 
 class FileUploadView(APIView):
@@ -61,6 +66,6 @@ class VoiceChatView(APIView):
         username = request.session.get("username")
         user_id = request.session.get("user_id")
 
-        if not username:
+        if not username or not user_id:
             return redirect("index")
         return render(request, "voice-chat.html", {"user_id": user_id})

@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block content %} 
+{% extends "base.html" %} {% block content %} {{ user_id|json_script:"user-id"}}
 {% include "components/chat-box.html" %}
 
 <script>
@@ -10,17 +10,39 @@
     localStorage.setItem("theme", newTheme);
   }
 
-  // Set initial theme from localStorage or default to dark
+  let userHistory = [];
   document.addEventListener("DOMContentLoaded", () => {
     const savedTheme = localStorage.getItem("theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
+    userHistory = localStorage.getItem("voice_history")
+      ? JSON.parse(localStorage.getItem("voice_history"))
+      : [];
+
+    for (user of userHistory) {
+      appendToHistory(user.username, user.chat_color);
+    }
   });
+
+  const max_history_size = 100;
+  function appendToHistory(username, chat_color) {
+    if (userHistory.length >= max_history_size) {
+      localStorage.setItem(
+        "voice_history",
+        JSON.stringify(userHistory.slice(-max_history_size))
+      );
+    }
+
+    document.querySelector("#history").innerHTML =
+      `<div style="color: ${chat_color}; padding-top: 15px">${username}</div>` +
+      document.querySelector("#history").innerHTML;
+  }
 
   const matchSound = document.getElementById("match-sound");
   matchSound.volume = 0.3;
 
   const ws_scheme = window.location.protocol === "https:" ? "wss://" : "ws://";
 
+  const userID = JSON.parse(document.getElementById("user-id").textContent);
   let chatColor = "#FF6B6B";
   let chatStarted = false;
   const controlBtn = document.querySelector("#control-btn");
@@ -35,6 +57,11 @@
     const user = data.user;
     const event = data.event;
     const chat_color = data.chat_color;
+    const user_id = data.user_id;
+    const second_user = data.second_user;
+    const second_user_color = data.second_user_color;
+    const amUser = user_id == userID;
+
     switch (event) {
       case "message":
         document.querySelector(
@@ -43,6 +70,9 @@
                 <span class="user-name" style="color: ${chat_color}">${user}:</span>
                 <span class="message">${message}</span>
               </div>`;
+        break;
+      case "info":
+        chatColor = chat_color;
         break;
       case "start":
         chatStarted = true;
@@ -56,24 +86,41 @@
         controlBtn.textContent = "Start";
 
         matchSound.play();
-        document.querySelector(
-          "#chat-messages"
-        ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> left the chat</div>`;
-        document.querySelector("#status").innerHTML = `${user} left the chat`;
+        if (!amUser) {
+          document.querySelector(
+            "#chat-messages"
+          ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> left the chat</div>`;
+          document.querySelector("#status").innerHTML = `${user} left the chat`;
+        }
         break;
       case "join":
         chatStarted = true;
         matchSound.play();
         document.querySelector("#chat-messages").innerHTML = "";
-        document.querySelector(
-          "#chat-messages"
-        ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> joined the chat</div>`;
-        document.querySelector(
-          "#status"
-        ).innerHTML = `You were paired, say hi!`;
-        break;
-      case "searching":
-        document.querySelector("#status").innerHTML = "Searching...";
+        if (amUser) {
+          appendToHistory(second_user, second_user_color);
+
+          userHistory.push({
+            username: second_user,
+            chat_color: second_user_color,
+          });
+          localStorage.setItem("voice_history", JSON.stringify(userHistory));
+          document.querySelector(
+            "#status"
+          ).innerHTML = `You were paired with <span style="color: ${second_user_color}">${second_user}</span>, say hi!`;
+        } else {
+          document.querySelector(
+            "#chat-messages"
+          ).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${user}</span> joined the chat</div>`;
+          userHistory.push({ username: user, chat_color: chat_color });
+          localStorage.setItem("voice_history", JSON.stringify(userHistory));
+
+          appendToHistory(user, chat_color);
+
+          document.querySelector(
+            "#status"
+          ).innerHTML = `You were paired with <span style="color: ${chat_color}">${user}</span>, say hi!`;
+        }
         break;
       case "image":
         const imgContainer = document.createElement("div");
