@@ -23,7 +23,7 @@ def add_chat_queue(room_group_name, user_id, username, chat_color, channel_name)
         user_id=user_id,
         username=username,
         chat_color=chat_color,
-        channel_name=channel_name
+        channel_name=channel_name,
     )
 
 
@@ -49,7 +49,7 @@ def add_voice_chat_queue(room_group_name, user_id, username, chat_color, channel
         user_id=user_id,
         username=username,
         chat_color=chat_color,
-        channel_name=channel_name
+        channel_name=channel_name,
     )
 
 
@@ -135,11 +135,19 @@ async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         (
             await add_voice_chat_queue(
-                self.room_group_name, self.user_id, self.username, self.chat_color, self.channel_name
+                self.room_group_name,
+                self.user_id,
+                self.username,
+                self.chat_color,
+                self.channel_name,
             )
             if consumer == "voice"
             else await add_chat_queue(
-                self.room_group_name, self.user_id, self.username, self.chat_color, self.channel_name
+                self.room_group_name,
+                self.user_id,
+                self.username,
+                self.chat_color,
+                self.channel_name,
             )
         )
         await self.channel_layer.group_send(
@@ -156,11 +164,11 @@ async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
 
 
 async def handle_stop(self: AsyncWebsocketConsumer, consumer="chat"):
-    (
+    if consumer == "voice":
         await delete_voice_chat_queue(self.user_id)
-        if consumer == "voice"
-        else delete_chat_queue(self.user_id)
-    )
+    else:
+        await delete_chat_queue(self.user_id)
+
     await self.channel_layer.group_send(
         self.room_group_name,
         {
@@ -219,15 +227,13 @@ async def handle_default(self: AsyncWebsocketConsumer, text_data_json, type):
 
 async def handle_image_consent(self: AsyncWebsocketConsumer, text_data_json, type):
 
-
     message = text_data_json.get("message")
     channel_name = text_data_json.get("channel_name")
-    
+
     if message == "allow":
-        await self.channel_layer.send(channel_name, {
-            "type": "update.image_consent",
-            "consent": True
-        })
+        await self.channel_layer.send(
+            channel_name, {"type": "update.image_consent", "consent": True}
+        )
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -241,12 +247,10 @@ async def handle_image_consent(self: AsyncWebsocketConsumer, text_data_json, typ
             },
         )
 
-
     elif message == "disallow":
-        await self.channel_layer.send(channel_name, {
-            "type": "update.image_consent",
-            "consent": False
-        })
+        await self.channel_layer.send(
+            channel_name, {"type": "update.image_consent", "consent": False}
+        )
 
         await self.channel_layer.group_send(
             self.room_group_name,

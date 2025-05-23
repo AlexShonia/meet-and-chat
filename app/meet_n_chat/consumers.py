@@ -6,8 +6,6 @@ from channels_redis.core import RedisChannelLayer
 
 from app.meet_n_chat.utils import (
     pick_random_color,
-    delete_chat_queue,
-    delete_voice_chat_queue,
     handle_start,
     handle_stop,
     handle_image_consent,
@@ -41,9 +39,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         await handle_stop(self, "voice")
-
-        await delete_chat_queue(self.user_id)
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
@@ -129,9 +124,6 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         await handle_stop(self, "voice")
-
-        await delete_voice_chat_queue(self.user_id)
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
