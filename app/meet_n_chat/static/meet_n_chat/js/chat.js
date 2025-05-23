@@ -11,6 +11,8 @@ import {
 	handleJoinMessage,
 	handleConsentMessage,
 	setupImageModal,
+	handleImagePaste,
+	setupImageUploadListener,
 } from "./chat_utils.js";
 
 const matchSound = document.getElementById("match-sound");
@@ -66,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	});
 
 	setupImageModal();
+	handleImagePaste(() => imageConsent, chatSocket);
 });
 
 chatSocket.onmessage = function (e) {
@@ -113,37 +116,4 @@ chatSocket.onclose = function (e) {
 
 setupChatInputHandlers(chatSocket);
 
-document.getElementById("myFile").addEventListener("change", function (e) {
-	if (this.files && this.files[0] && imageConsent) {
-		const formData = new FormData();
-		formData.append("filename", this.files[0]);
-		formData.append(
-			"csrfmiddlewaretoken",
-			document.querySelector("[name=csrfmiddlewaretoken]").value
-		);
-
-		fetch("/chat/upload-image", {
-			method: "POST",
-			body: formData,
-			headers: {
-				"X-CSRFToken": document.querySelector(
-					"[name=csrfmiddlewaretoken]"
-				).value,
-			},
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				if (data.file) {
-					chatSocket.send(
-						JSON.stringify({
-							message: data.file,
-							type: "image",
-						})
-					);
-				}
-			})
-			.catch((error) => {
-				console.error("Error:", error);
-			});
-	}
-});
+setupImageUploadListener(() => imageConsent, chatSocket)

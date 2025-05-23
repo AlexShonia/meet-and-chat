@@ -295,3 +295,99 @@ export function setupImageModal() {
 		}
 	});
 }
+
+export function handleImagePaste(getImageConsent, chatSocket) {
+	document
+		.getElementById("chat-message-input")
+		.addEventListener("paste", function (event) {
+			const items = event.clipboardData?.items || [];
+
+			for (const item of items) {
+				if (item.kind === "file" && item.type.startsWith("image/")) {
+					const file = item.getAsFile();
+					const imageConsent = getImageConsent();
+
+					if (file && imageConsent) {
+						const ext = file.type.split("/")[1] || "png";
+						const customFileName = `pasted_image_${Date.now()}.${ext}`;
+						const renamedFile = new File([file], customFileName, {
+							type: file.type,
+						});
+
+						const formData = new FormData();
+						formData.append("filename", renamedFile);
+						formData.append(
+							"csrfmiddlewaretoken",
+							document.querySelector("[name=csrfmiddlewaretoken]")
+								.value
+						);
+
+						fetch("/chat/upload-image", {
+							method: "POST",
+							body: formData,
+							headers: {
+								"X-CSRFToken": document.querySelector(
+									"[name=csrfmiddlewaretoken]"
+								).value,
+							},
+						})
+							.then((response) => response.json())
+							.then((data) => {
+								if (data.file) {
+									chatSocket.send(
+										JSON.stringify({
+											message: data.file,
+											type: "image",
+										})
+									);
+								}
+							})
+							.catch((error) => {
+								console.error("Error:", error);
+							});
+					}
+					break; // Only handle one image per paste
+				}
+			}
+		});
+}
+
+
+export function setupImageUploadListener(getImageConsent, chatSocket) {
+	document.getElementById("myFile").addEventListener("change", function (e) {
+		const imageConsent = getImageConsent();
+
+		if (this.files && this.files[0] && imageConsent) {
+			const formData = new FormData();
+			formData.append("filename", this.files[0]);
+			formData.append(
+				"csrfmiddlewaretoken",
+				document.querySelector("[name=csrfmiddlewaretoken]").value
+			);
+
+			fetch("/chat/upload-image", {
+				method: "POST",
+				body: formData,
+				headers: {
+					"X-CSRFToken": document.querySelector(
+						"[name=csrfmiddlewaretoken]"
+					).value,
+				},
+			})
+				.then((response) => response.json())
+				.then((data) => {
+					if (data.file) {
+						chatSocket.send(
+							JSON.stringify({
+								message: data.file,
+								type: "image",
+							})
+						);
+					}
+				})
+				.catch((error) => {
+					console.error("Error:", error);
+				});
+		}
+	});
+}

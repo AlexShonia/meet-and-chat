@@ -11,6 +11,7 @@ import {
 	handleConsentMessage,
 	toggleImageConsent,
 	setupImageModal,
+	setupImageUploadListener,
 } from "./chat_utils.js";
 
 let userHistory = [];
@@ -80,6 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	});
 
 	setupImageModal();
+
+	handleImagePaste(() => imageConsent, chatSocket);
 });
 
 const openMediaDevices = async (constraints) => {
@@ -283,40 +286,7 @@ chatSocket.onclose = function (e) {
 
 setupChatInputHandlers(chatSocket);
 
-document.getElementById("myFile").addEventListener("change", function (e) {
-	if (this.files && this.files[0]) {
-		const formData = new FormData();
-		formData.append("filename", this.files[0]);
-		formData.append(
-			"csrfmiddlewaretoken",
-			document.querySelector("[name=csrfmiddlewaretoken]").value
-		);
-
-		fetch("/chat/upload-image", {
-			method: "POST",
-			body: formData,
-			headers: {
-				"X-CSRFToken": document.querySelector(
-					"[name=csrfmiddlewaretoken]"
-				).value,
-			},
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				if (data.file) {
-					chatSocket.send(
-						JSON.stringify({
-							message: data.file,
-							type: "image",
-						})
-					);
-				}
-			})
-			.catch((error) => {
-				console.error("Error:", error);
-			});
-	}
-});
+setupImageUploadListener(() => imageConsent, chatSocket);
 
 function toggleMic() {
 	const micToggle = document.getElementById("mic-toggle");
