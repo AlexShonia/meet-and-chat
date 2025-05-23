@@ -10,6 +10,7 @@ import {
 	handleStopMessage,
 	handleJoinMessage,
 	handleConsentMessage,
+	setupImageModal,
 } from "./chat_utils.js";
 
 const matchSound = document.getElementById("match-sound");
@@ -63,6 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById("audio-toggle")?.addEventListener("click", () => {
 		toggleAudio(matchSound);
 	});
+
+	setupImageModal();
 });
 
 chatSocket.onmessage = function (e) {

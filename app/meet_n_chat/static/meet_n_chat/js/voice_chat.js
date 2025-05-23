@@ -10,6 +10,7 @@ import {
 	handleImageMessage,
 	handleConsentMessage,
 	toggleImageConsent,
+	setupImageModal,
 } from "./chat_utils.js";
 
 let userHistory = [];
@@ -77,6 +78,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			await window.audioContext.resume();
 		}
 	});
+
+	setupImageModal();
 });
 
 const openMediaDevices = async (constraints) => {

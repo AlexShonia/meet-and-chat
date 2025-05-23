@@ -268,3 +268,30 @@ export function handleConsentMessage(data, user, secondUser) {
 		}
 	}
 }
+
+export function setupImageModal() {
+	const modal = document.getElementById("image-modal");
+	const modalImg = document.getElementById("image-modal-content");
+	const closeBtn = document.getElementById("image-modal-close");
+
+	document
+		.querySelector("#chat-messages")
+		.addEventListener("click", function (e) {
+			if (e.target.tagName === "IMG") {
+				modal.style.display = "flex";
+				modalImg.src = e.target.src;
+			}
+		});
+
+	closeBtn.onclick = () => {
+		modal.style.display = "none";
+		modalImg.src = "";
+	};
+
+	modal.addEventListener("click", (e) => {
+		if (e.target === modal) {
+			modal.style.display = "none";
+			modalImg.src = "";
+		}
+	});
+}
