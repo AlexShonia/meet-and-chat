@@ -29,7 +29,7 @@ services:
     image: postgres:17.5
     hostname: meetandchat
     ports:
-      - "127.0.0.1:5435:5432"
+      - "127.0.0.1:5436:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
