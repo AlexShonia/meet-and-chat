@@ -151,6 +151,7 @@ async function handleChatMessage(data) {
 			break;
 		case "start":
 			handleStartMessage(data, chatStarted, user);
+			chatStarted = true;
 			break;
 		case "stop":
 			peerConnection?.close();
