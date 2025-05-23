@@ -17,9 +17,13 @@ def pop_chat_queue():
 
 
 @database_sync_to_async
-def add_chat_queue(room_group_name, user_id, username, chat_color):
+def add_chat_queue(room_group_name, user_id, username, chat_color, channel_name):
     ChatQueue.objects.create(
-        group_name=room_group_name, user_id=user_id, username=username, chat_color=chat_color
+        group_name=room_group_name,
+        user_id=user_id,
+        username=username,
+        chat_color=chat_color,
+        channel_name=channel_name
     )
 
 
@@ -39,9 +43,13 @@ def pop_voice_chat_queue():
 
 
 @database_sync_to_async
-def add_voice_chat_queue(room_group_name, user_id, username, chat_color):
+def add_voice_chat_queue(room_group_name, user_id, username, chat_color, channel_name):
     VoiceChatQueue.objects.create(
-        group_name=room_group_name, user_id=user_id, username=username, chat_color=chat_color
+        group_name=room_group_name,
+        user_id=user_id,
+        username=username,
+        chat_color=chat_color,
+        channel_name=channel_name
     )
 
 
@@ -100,6 +108,7 @@ async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
     user_id = queue_row.get("user_id")
     username = queue_row.get("username")
     group_name = queue_row.get("group_name")
+    channel_name = queue_row.get("channel_name")
     chat_color = queue_row.get("chat_color")
 
     if group_name and user_id != self.user_id:
@@ -112,7 +121,9 @@ async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
                 "type": "chat.message",
                 "message": "",
                 "user": self.username,
+                "channel_name": self.channel_name,
                 "second_user": username,
+                "second_channel_name": channel_name,
                 "second_user_color": chat_color,
                 "user_id": self.user_id,
                 "event": "join",
@@ -123,9 +134,13 @@ async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
         self.room_group_name = f"chat_{uuid4().hex}"
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         (
-            await add_voice_chat_queue(self.room_group_name, self.user_id, self.username, self.chat_color)
+            await add_voice_chat_queue(
+                self.room_group_name, self.user_id, self.username, self.chat_color, self.channel_name
+            )
             if consumer == "voice"
-            else await add_chat_queue(self.room_group_name, self.user_id, self.username, self.chat_color)
+            else await add_chat_queue(
+                self.room_group_name, self.user_id, self.username, self.chat_color, self.channel_name
+            )
         )
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -164,13 +179,83 @@ async def handle_stop(self: AsyncWebsocketConsumer, consumer="chat"):
 
 async def handle_default(self: AsyncWebsocketConsumer, text_data_json, type):
     message = text_data_json.get("message")
-    await self.channel_layer.group_send(
-        self.room_group_name,
-        {
-            "type": "chat.message",
-            "message": message,
-            "user": self.username,
-            "event": "image" if type == "image" else "message",
-            "chat_color": self.chat_color,
-        },
-    )
+
+    if type == "image":
+        if self.image_consent:
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "chat.message",
+                    "message": message,
+                    "user": self.username,
+                    "event": "image",
+                    "chat_color": self.chat_color,
+                },
+            )
+        else:
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "chat.message",
+                    "message": "You don't have consent to send images",
+                    "user": self.username,
+                    "event": "no_consent",
+                    "chat_color": self.chat_color,
+                },
+            )
+
+    else:
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "chat.message",
+                "message": message,
+                "user": self.username,
+                "event": "message",
+                "chat_color": self.chat_color,
+            },
+        )
+
+
+async def handle_image_consent(self: AsyncWebsocketConsumer, text_data_json, type):
+
+
+    message = text_data_json.get("message")
+    channel_name = text_data_json.get("channel_name")
+    
+    if message == "allow":
+        await self.channel_layer.send(channel_name, {
+            "type": "update.image_consent",
+            "consent": True
+        })
+
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "chat.message",
+                "message": message,
+                "user": self.username,
+                "user_id": self.user_id,
+                "event": "consent",
+                "chat_color": self.chat_color,
+            },
+        )
+
+
+    elif message == "disallow":
+        await self.channel_layer.send(channel_name, {
+            "type": "update.image_consent",
+            "consent": False
+        })
+
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "chat.message",
+                "message": message,
+                "user": self.username,
+                "user_id": self.user_id,
+                "event": "consent",
+                "chat_color": self.chat_color,
+            },
+        )

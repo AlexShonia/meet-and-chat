@@ -51,7 +51,6 @@ class FileUploadView(APIView):
         up_file = request.FILES["filename"]
         import os
 
-        # Save the file
         file_path = os.path.join(settings.MEDIA_ROOT, up_file.name)
         with open(file_path, "wb+") as destination:
             for chunk in up_file.chunks():

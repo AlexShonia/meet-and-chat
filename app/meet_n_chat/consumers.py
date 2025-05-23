@@ -10,6 +10,7 @@ from app.meet_n_chat.utils import (
     delete_voice_chat_queue,
     handle_start,
     handle_stop,
+    handle_image_consent,
     handle_default,
 )
 
@@ -22,6 +23,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.username = session.get("username")
         self.user_id = session.get("user_id")
         self.chat_color = pick_random_color()
+        self.image_consent = False
 
         self.room_group_name = f"chat_{uuid4().hex}"
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
@@ -52,16 +54,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await handle_start(self)
             case "stop":
                 await handle_stop(self)
+            case "consent":
+                await handle_image_consent(self, text_data_json, type)
             case default:
                 await handle_default(self, text_data_json, type)
 
     async def chat_message(self, event):
         message = event.get("message")
         user = event.get("user")
+        channel_name = event.get("channel_name")
         user_id = event.get("user_id")
         chat_event = event.get("event")
         chat_color = event.get("chat_color")
         second_user = event.get("second_user")
+        second_channel_name = event.get("second_channel_name")
         second_user_color = event.get("second_user_color")
 
         if second_user:
@@ -71,7 +77,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "message": message,
                         "user": user,
                         "user_id": user_id,
+                        "channel_name": channel_name,
                         "second_user": second_user,
+                        "second_channel_name": second_channel_name,
                         "second_user_color": second_user_color,
                         "event": chat_event,
                         "chat_color": chat_color,
@@ -91,6 +99,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
             )
 
+    async def update_image_consent(self, event):
+        self.image_consent = event.get("consent")
+
 
 class VoiceChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -100,6 +111,7 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
         self.username = session.get("username")
         self.user_id = session.get("user_id")
         self.chat_color = pick_random_color()
+        self.image_consent = False
 
         self.room_group_name = f"chat_{uuid4().hex}"
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
@@ -130,6 +142,8 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
                 await handle_start(self, "voice")
             case "stop":
                 await handle_stop(self, "voice")
+            case "consent":
+                await handle_image_consent(self, text_data_json, type)
             case "offer":
                 offer = text_data_json.get("offer")
                 await self.channel_layer.group_send(
@@ -171,6 +185,8 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
         ice_candidate = event.get("iceCandidate")
         second_user = event.get("second_user")
         second_user_color = event.get("second_user_color")
+        channel_name = event.get("channel_name")
+        second_channel_name = event.get("second_channel_name")
 
         if offer:
             await self.send(
@@ -203,7 +219,9 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
                         "message": message,
                         "user": user,
                         "user_id": user_id,
+                        "channel_name": channel_name,
                         "second_user": second_user,
+                        "second_channel_name": second_channel_name,
                         "second_user_color": second_user_color,
                         "event": chat_event,
                         "chat_color": chat_color,
@@ -222,3 +240,8 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
                     }
                 )
             )
+
+
+
+    async def update_image_consent(self, event):
+        self.image_consent = event.get("consent")

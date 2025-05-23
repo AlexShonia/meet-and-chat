@@ -128,11 +128,9 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
-    justify-content: flex-start;
+    justify-content: space-between;
   }
-
-  #control-btn {
-    width: 10vh;
+  button {
     padding: 8px 16px;
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -143,9 +141,13 @@
     white-space: nowrap;
   }
 
-  #control-btn:hover {
+  button:hover {
     background-color: var(--hover-bg);
     color: var(--hover-text);
+  }
+
+  #control-btn {
+    width: 10vh;
   }
 
   #go-back-btn {
@@ -172,7 +174,6 @@
   #status {
     font-size: 13px;
     text-align: left;
-    flex: 1;
   }
 
   .audio-toggle {
@@ -242,6 +243,14 @@
     #history_container {
       display: none;
     }
+    #left-buttons {
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    #right-buttons {
+      flex-direction: column;
+      justify-content: flex-start;
+    }
   }
 
   #volume-fill {
@@ -257,7 +266,6 @@
 ></audio>
 <div
   id="history_container"
-  
   style="
     top: 48px;
     left: 60px;
@@ -274,35 +282,44 @@
 </div>
 <div class="chat-container">
   <div class="status-container">
-    <button
-      id="go-back-btn"
-      onclick="window.location.href='{% url 'choose' %}'"
-    >
-      Go Back
-    </button>
-    <button id="control-btn" onclick="this.blur(); queueController()">
-      Start
-    </button>
-    <div id="status"></div>
-    <button id="audio-toggle" class="audio-toggle" onclick="toggleAudio()">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="800px"
-        height="800px"
-        viewBox="0 0 16 16"
-        fill="none"
+    <div id="left-buttons" style="display: flex; align-items: center; gap: 4px">
+      <button
+        id="go-back-btn"
+        onclick="window.location.href='{% url 'choose' %}'"
       >
-        <path id="path-bg" d="M6 1H8V15H6L2 11H0V5H2L6 1Z" fill="#000000" />
-        <path
-          id="path-bg"
-          d="M14 8C14 5.79086 12.2091 4 10 4V2C13.3137 2 16 4.68629 16 8C16 11.3137 13.3137 14 10 14V12C12.2091 12 14 10.2091 14 8Z"
-        />
-        <path
-          id="path-bg"
-          d="M12 8C12 9.10457 11.1046 10 10 10V6C11.1046 6 12 6.89543 12 8Z"
-        />
-      </svg>
-    </button>
+        Go Back
+      </button>
+      <button id="control-btn" onclick="this.blur()">Start</button>
+      <div id="status"></div>
+    </div>
+
+    <div
+      id="right-buttons"
+      style="display: flex; flex-direction: row; gap: 4px"
+    >
+      <button style="width: 120px" id="consent-btn" onclick="this.blur(); ">
+        Allow Images
+      </button>
+      <button id="audio-toggle" class="audio-toggle">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="800px"
+          height="800px"
+          viewBox="0 0 16 16"
+          fill="none"
+        >
+          <path id="path-bg" d="M6 1H8V15H6L2 11H0V5H2L6 1Z" fill="#000000" />
+          <path
+            id="path-bg"
+            d="M14 8C14 5.79086 12.2091 4 10 4V2C13.3137 2 16 4.68629 16 8C16 11.3137 13.3137 14 10 14V12C12.2091 12 14 10.2091 14 8Z"
+          />
+          <path
+            id="path-bg"
+            d="M12 8C12 9.10457 11.1046 10 10 10V6C11.1046 6 12 6.89543 12 8Z"
+          />
+        </svg>
+      </button>
+    </div>
   </div>
   <div id="chat-messages"></div>
 
@@ -313,7 +330,6 @@
       id="mic-toggle"
       style="min-height: 24px; min-width: 24px"
       class="audio-toggle"
-      onclick="toggleMic()"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -382,11 +398,13 @@
       name="filename"
       accept="image/*"
       style="display: none"
+      disabled
     />
     <input
       id="chat-message-input"
       type="text"
       placeholder="Type your message..."
+      maxlength="1000"
     />
     <input id="chat-message-submit" type="button" value="Send" />
   </div>
