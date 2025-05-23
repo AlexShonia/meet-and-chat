@@ -12,6 +12,7 @@ import {
 	toggleImageConsent,
 	setupImageModal,
 	setupImageUploadListener,
+	handleImagePaste,
 } from "./chat_utils.js";
 
 let userHistory = [];
