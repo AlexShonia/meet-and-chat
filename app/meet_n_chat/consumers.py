@@ -128,6 +128,7 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         await handle_stop(self, "voice")
+        asyncio.create_task(cleanup_user_images(self))
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
