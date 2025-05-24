@@ -1,4 +1,5 @@
 import json
+import asyncio
 from uuid import uuid4
 
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -10,6 +11,7 @@ from app.meet_n_chat.utils import (
     handle_stop,
     handle_image_consent,
     handle_default,
+    cleanup_user_images
 )
 
 
@@ -39,6 +41,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         await handle_stop(self, "voice")
+        asyncio.create_task(cleanup_user_images(self))
+
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
@@ -232,8 +236,6 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
                     }
                 )
             )
-
-
 
     async def update_image_consent(self, event):
         self.image_consent = event.get("consent")

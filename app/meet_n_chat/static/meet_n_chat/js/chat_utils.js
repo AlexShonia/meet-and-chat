@@ -296,7 +296,7 @@ export function setupImageModal() {
 	});
 }
 
-export function handleImagePaste(getImageConsent, chatSocket) {
+export function handleImagePaste(getImageConsent, chatSocket, user) {
 	document
 		.getElementById("chat-message-input")
 		.addEventListener("paste", function (event) {
@@ -309,7 +309,9 @@ export function handleImagePaste(getImageConsent, chatSocket) {
 
 					if (file && imageConsent) {
 						const ext = file.type.split("/")[1] || "png";
-						const customFileName = `pasted_image_${Date.now()}.${ext}`;
+						const customFileName = `${
+							user.id
+						}_${Date.now()}.${ext}`;
 						const renamedFile = new File([file], customFileName, {
 							type: file.type,
 						});
@@ -322,7 +324,7 @@ export function handleImagePaste(getImageConsent, chatSocket) {
 								.value
 						);
 
-						fetch("/chat/upload-image", {
+						fetch("/chat/upload-image/", {
 							method: "POST",
 							body: formData,
 							headers: {
@@ -352,20 +354,27 @@ export function handleImagePaste(getImageConsent, chatSocket) {
 		});
 }
 
-
-export function setupImageUploadListener(getImageConsent, chatSocket) {
+export function setupImageUploadListener(getImageConsent, chatSocket, user) {
 	document.getElementById("myFile").addEventListener("change", function (e) {
 		const imageConsent = getImageConsent();
 
 		if (this.files && this.files[0] && imageConsent) {
+			const originalFile = this.files[0];
+			const ext = originalFile.name.split(".").pop();
+			const customFileName = `${user.id}_${Date.now()}.${ext}`;
+
+			const customFile = new File([originalFile], customFileName, {
+				type: originalFile.type,
+			});
+
 			const formData = new FormData();
-			formData.append("filename", this.files[0]);
+			formData.append("filename", customFile);
 			formData.append(
 				"csrfmiddlewaretoken",
 				document.querySelector("[name=csrfmiddlewaretoken]").value
 			);
 
-			fetch("/chat/upload-image", {
+			fetch("/chat/upload-image/", {
 				method: "POST",
 				body: formData,
 				headers: {

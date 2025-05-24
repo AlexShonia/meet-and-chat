@@ -1,6 +1,9 @@
+import os
 import random
 from uuid import uuid4
+import asyncio
 
+from django.conf import settings
 from app.meet_n_chat.models import ChatQueue, VoiceChatQueue
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -263,3 +266,12 @@ async def handle_image_consent(self: AsyncWebsocketConsumer, text_data_json, typ
                 "chat_color": self.chat_color,
             },
         )
+
+async def cleanup_user_images(self):
+    await asyncio.sleep(600)
+    for img in os.listdir(settings.MEDIA_ROOT):
+        if self.user_id in img:
+            try:
+                os.remove(f"{settings.MEDIA_ROOT}/{img}")
+            except FileNotFoundError:
+                pass

@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	setupImageModal();
 
-	handleImagePaste(() => imageConsent, chatSocket);
+	handleImagePaste(() => imageConsent, chatSocket, user);
 });
 
 const openMediaDevices = async (constraints) => {
@@ -288,7 +288,7 @@ chatSocket.onclose = function (e) {
 
 setupChatInputHandlers(chatSocket);
 
-setupImageUploadListener(() => imageConsent, chatSocket);
+setupImageUploadListener(() => imageConsent, chatSocket, user)
 
 function toggleMic() {
 	const micToggle = document.getElementById("mic-toggle");
@@ -358,7 +358,7 @@ function openModal() {
 
 function closeModal() {
 	document.getElementById("modalOverlay").style.display = "none";
-	window.location.href = "{% url 'choose' %}";
+	window.location.href = "/choose/";
 }
 
 overlay.addEventListener("click", function (e) {

@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	});
 
 	setupImageModal();
-	handleImagePaste(() => imageConsent, chatSocket);
+	handleImagePaste(() => imageConsent, chatSocket, user);
 });
 
 chatSocket.onmessage = function (e) {
@@ -116,4 +116,4 @@ chatSocket.onclose = function (e) {
 
 setupChatInputHandlers(chatSocket);
 
-setupImageUploadListener(() => imageConsent, chatSocket)
+setupImageUploadListener(() => imageConsent, chatSocket, user)
