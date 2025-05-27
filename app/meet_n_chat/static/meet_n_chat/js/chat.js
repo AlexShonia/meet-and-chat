@@ -23,6 +23,7 @@ const user = {
 	id: JSON.parse(document.getElementById("user-id").textContent),
 	chatColor: "#FF6B6B",
 };
+
 const secondUser = {
 	username: "",
 	chatColor: "",

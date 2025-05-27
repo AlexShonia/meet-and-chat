@@ -288,7 +288,7 @@ chatSocket.onclose = function (e) {
 
 setupChatInputHandlers(chatSocket);
 
-setupImageUploadListener(() => imageConsent, chatSocket, user)
+setupImageUploadListener(() => imageConsent, chatSocket, user);
 
 function toggleMic() {
 	const micToggle = document.getElementById("mic-toggle");
@@ -351,13 +351,13 @@ function toggleMic() {
 const overlay = document.getElementById("modalOverlay");
 
 function openModal() {
-	document.getElementById("modalOverlay").style.display = "flex";
+	overlay.style.display = "flex";
 	const main = document.querySelector("main");
 	main.setAttribute("inert", "");
 }
 
 function closeModal() {
-	document.getElementById("modalOverlay").style.display = "none";
+	overlay.style.display = "none";
 	window.location.href = "/choose/";
 }
 
@@ -365,6 +365,11 @@ overlay.addEventListener("click", function (e) {
 	if (e.target === overlay) {
 		closeModal();
 	}
+});
+
+
+document.querySelector("#closeModal")?.addEventListener("click", () => {
+	closeModal();
 });
 
 class SoundMeter {

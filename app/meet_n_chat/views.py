@@ -1,21 +1,24 @@
 from django.shortcuts import render, redirect
 from django.conf import settings
+from rest_framework import status, serializers, mixins, viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework import status, serializers
+from rest_framework.decorators import action
 from uuid import uuid4
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
-from django.contrib.auth import login, get_user_model
+from django.contrib.auth import login, get_user_model, logout
+from app.meet_n_chat.models import User
+from app.meet_n_chat.serializers import UserSerializer
 
 
 from app.meet_n_chat.google import (
     GoogleLoginFlowService,
 )
 
+
 class PublicApi(APIView):
     permission_classes = ()
-
 
 
 class IndexView(PublicApi):
@@ -37,15 +40,20 @@ class ChooseView(PublicApi):
 
     def get(self, request: Request):
         if request.user.is_authenticated:
+            user_id = request.user.id.hex
+            logged_in = True
             request.session["username"] = request.user.username
-            request.session["user_id"] = request.user.id.hex
+            request.session["user_id"] = user_id
         else:
             username = request.session.get("username")
             user_id = request.session.get("user_id")
+            logged_in = False
             if not username or not user_id:
                 return redirect("index")
 
-        return render(request, "choose.html")
+        return render(
+            request, "choose.html", {"user_id": user_id, "logged_in": logged_in}
+        )
 
 
 class ChatView(PublicApi):
@@ -87,7 +95,6 @@ class VoiceChatView(PublicApi):
         if not username or not user_id:
             return redirect("index")
         return render(request, "voice-chat.html", {"user_id": user_id})
-
 
 
 class GoogleLoginRedirectApi(PublicApi):
@@ -163,3 +170,19 @@ class GoogleLoginApi(PublicApi):
         request.session.save()
 
         return redirect("choose")
+
+
+class UserViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    permission_classes = ()
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    @action(methods=["POST"], detail=False, url_path="logout")
+    def userLogout(self, request, *args, **kwargs):
+        logout(request)
+        return Response(data={"redirect_url": "/"}, status=status.HTTP_200_OK)

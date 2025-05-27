@@ -75,13 +75,17 @@
   }
 </style>
 
+{% load static %}
 <div class="dropdown">
   <div class="dropdown-mask"></div>
   <button class="settings">Settings</button>
   <div class="dropdown-content">
-    <a >Profile</a>
+    <a id="profile-btn">Profile</a>
     <a onclick="toggleTheme()">Toggle Theme</a>
-    <a >Donate</a>
-    <a >Logout</a>
+    <a>Donate</a>
+    <a id="logout-btn">Logout</a>
   </div>
+  {% include "components/profile-modal.html" %} {% csrf_token %}
 </div>
+
+<script type="module" src="{% static 'meet_n_chat/js/settings.js' %}"></script>
