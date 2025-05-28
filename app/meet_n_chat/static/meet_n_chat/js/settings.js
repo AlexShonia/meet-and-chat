@@ -7,6 +7,39 @@ document.addEventListener("DOMContentLoaded", () => {
 	document.querySelector("#logout-btn")?.addEventListener("click", () => {
 		logout();
 	});
+	const profileTabBtn = document.querySelector("#profile-tab-btn");
+	const accountTabBtn = document.querySelector("#account-tab-btn");
+	const friendsTabBtn = document.querySelector("#friends-tab-btn");
+	const profileTab = document.querySelector("#updateUser");
+	const accountTab = document.querySelector("#account");
+	const friendsTab = document.querySelector("#friends");
+
+	profileTabBtn?.addEventListener("click", () => {
+		profileTab.style.display = "flex";
+		accountTab.style.display = "none";
+		friendsTab.style.display = "none";
+		deleteAccBtn.textContent = "DELETE ACCOUNT";
+	});
+	accountTabBtn?.addEventListener("click", () => {
+		profileTab.style.display = "none";
+		accountTab.style.display = "flex";
+		friendsTab.style.display = "none";
+		deleteAccBtn.textContent = "DELETE ACCOUNT";
+	});
+	friendsTabBtn?.addEventListener("click", () => {
+		profileTab.style.display = "none";
+		accountTab.style.display = "none";
+		friendsTab.style.display = "flex";
+		deleteAccBtn.textContent = "DELETE ACCOUNT";
+	});
+	const deleteAccBtn = document.querySelector("#delete-acc-btn");
+	deleteAccBtn.addEventListener("click", async () => {
+		if (deleteAccBtn.textContent.trim() == "DELETE ACCOUNT") {
+			deleteAccBtn.textContent = "Are you Sure?";
+		} else if (deleteAccBtn.textContent.trim() == "Are you Sure?") {
+			await deleteAccount();
+		}
+	});
 });
 
 function logout() {
@@ -50,7 +83,6 @@ async function openModal() {
 
 	document.querySelector("#email").textContent = userData.email;
 	document.querySelector("#username").value = userData.username;
-
 }
 
 function closeModal() {
@@ -93,3 +125,19 @@ document.getElementById("updateUser").addEventListener("submit", async (e) => {
 		console.error("Failed to update profile.");
 	}
 });
+
+async function deleteAccount() {
+	const response = await fetch(`/user/${user.id}/`, {
+		method: "DELETE",
+		headers: {
+			"X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+				.value,
+		},
+	});
+
+	if (response.ok) {
+		window.location.href = `${window.location.origin}`;
+	} else {
+		console.error("Failed to delete profile.");
+	}
+}
