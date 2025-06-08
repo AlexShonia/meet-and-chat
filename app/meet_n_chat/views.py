@@ -35,6 +35,8 @@ class ChooseView(PublicApi):
             )
         request.session["username"] = username
         request.session["user_id"] = uuid4().hex
+        request.session["logged_in"] = False
+
 
         return render(request, "choose.html")
 
@@ -44,10 +46,11 @@ class ChooseView(PublicApi):
             logged_in = True
             request.session["username"] = request.user.username
             request.session["user_id"] = user_id
+            request.session["logged_in"] = logged_in
         else:
             username = request.session.get("username")
             user_id = request.session.get("user_id")
-            logged_in = False
+            logged_in = request.session.get("logged_in")
             if not username or not user_id:
                 return redirect("index")
 
@@ -186,3 +189,18 @@ class UserViewSet(
     def userLogout(self, request, *args, **kwargs):
         logout(request)
         return Response(data={"redirect_url": "/"}, status=status.HTTP_200_OK)
+
+    @action(methods=["GET"], detail=True, url_path="public-profile")
+    def publicProfile(self, request, pk, *args, **kwargs):
+        user = User.objects.filter(id=pk)
+        if user.count() > 0:
+            user = user[0]
+            return Response(
+                data={"username": user.username, "id": user.id},
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(
+                data={"error": "user not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )

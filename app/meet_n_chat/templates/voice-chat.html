@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% block content %} {{ user_id|json_script:"user-id"}}
-<main>{% include "components/chat-box.html" with voice_chat=True %}</main>
+{% include "components/chat-box.html" with voice_chat=True %}
 {% include "components/text-modal.html" with modal_text="Allow microphone to continue" %}
 {% load static %} 
 <script

@@ -2,6 +2,7 @@ const user = {
 	id: JSON.parse(document.getElementById("user-id").textContent),
 	loggedIn: JSON.parse(document.getElementById("logged-in").textContent),
 };
+const main = document.querySelector("main");
 
 document.addEventListener("DOMContentLoaded", () => {
 	document.querySelector("#logout-btn")?.addEventListener("click", () => {
@@ -32,12 +33,29 @@ document.addEventListener("DOMContentLoaded", () => {
 		friendsTab.style.display = "flex";
 		deleteAccBtn.textContent = "DELETE ACCOUNT";
 	});
+
 	const deleteAccBtn = document.querySelector("#delete-acc-btn");
 	deleteAccBtn.addEventListener("click", async () => {
 		if (deleteAccBtn.textContent.trim() == "DELETE ACCOUNT") {
 			deleteAccBtn.textContent = "Are you Sure?";
 		} else if (deleteAccBtn.textContent.trim() == "Are you Sure?") {
 			await deleteAccount();
+		}
+	});
+
+	document.querySelector("#profile-btn")?.addEventListener("click", () => {
+		openModal();
+	});
+
+	document
+		.querySelector("#closeProfileModal")
+		?.addEventListener("click", () => {
+			closeModal();
+		});
+
+	overlay.addEventListener("click", function (e) {
+		if (e.target === overlay) {
+			closeModal();
 		}
 	});
 });
@@ -65,7 +83,6 @@ async function openModal() {
 		return;
 	}
 	overlay.style.display = "flex";
-	const main = document.querySelector("main");
 	main.setAttribute("inert", "");
 
 	let response = await fetch(`/user/${user.id}/`, {
@@ -87,22 +104,8 @@ async function openModal() {
 
 function closeModal() {
 	overlay.style.display = "none";
-	window.location.href = "/choose/";
+	main.removeAttribute("inert", "");
 }
-
-document.querySelector("#profile-btn")?.addEventListener("click", () => {
-	openModal();
-});
-
-document.querySelector("#closeProfileModal")?.addEventListener("click", () => {
-	closeModal();
-});
-
-overlay.addEventListener("click", function (e) {
-	if (e.target === overlay) {
-		closeModal();
-	}
-});
 
 document.getElementById("updateUser").addEventListener("submit", async (e) => {
 	e.preventDefault();

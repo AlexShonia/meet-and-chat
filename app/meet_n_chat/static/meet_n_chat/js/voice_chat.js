@@ -13,6 +13,7 @@ import {
 	setupImageModal,
 	setupImageUploadListener,
 	handleImagePaste,
+	setupPublicProfileModal,
 } from "./chat_utils.js";
 
 let userHistory = [];
@@ -84,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	setupImageModal();
 
 	handleImagePaste(() => imageConsent, chatSocket, user);
+	setupPublicProfileModal()
 });
 
 const openMediaDevices = async (constraints) => {

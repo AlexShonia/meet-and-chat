@@ -20,13 +20,14 @@ def pop_chat_queue():
 
 
 @database_sync_to_async
-def add_chat_queue(room_group_name, user_id, username, chat_color, channel_name):
+def add_chat_queue(room_group_name, user_id, username, chat_color, channel_name, logged_in):
     ChatQueue.objects.create(
         group_name=room_group_name,
         user_id=user_id,
         username=username,
         chat_color=chat_color,
         channel_name=channel_name,
+        logged_in=logged_in
     )
 
 
@@ -46,13 +47,14 @@ def pop_voice_chat_queue():
 
 
 @database_sync_to_async
-def add_voice_chat_queue(room_group_name, user_id, username, chat_color, channel_name):
+def add_voice_chat_queue(room_group_name, user_id, username, chat_color, channel_name, logged_in):
     VoiceChatQueue.objects.create(
         group_name=room_group_name,
         user_id=user_id,
         username=username,
         chat_color=chat_color,
         channel_name=channel_name,
+        logged_in=logged_in
     )
 
 
@@ -113,6 +115,7 @@ async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
     group_name = queue_row.get("group_name")
     channel_name = queue_row.get("channel_name")
     chat_color = queue_row.get("chat_color")
+    logged_in = queue_row.get("logged_in")
 
     if group_name and user_id != self.user_id:
         self.room_group_name = group_name
@@ -123,14 +126,17 @@ async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
             {
                 "type": "chat.message",
                 "message": "",
+                "event": "join",
                 "user": self.username,
+                "user_id": self.user_id,
                 "channel_name": self.channel_name,
+                "chat_color": self.chat_color,
+                "logged_in": self.logged_in,
                 "second_user": username,
                 "second_channel_name": channel_name,
                 "second_user_color": chat_color,
-                "user_id": self.user_id,
-                "event": "join",
-                "chat_color": self.chat_color,
+                "second_user_id": user_id,
+                "second_user_logged_in": logged_in,
             },
         )
     else:
@@ -143,6 +149,7 @@ async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
                 self.username,
                 self.chat_color,
                 self.channel_name,
+                self.logged_in
             )
             if consumer == "voice"
             else await add_chat_queue(
@@ -151,6 +158,7 @@ async def handle_start(self: AsyncWebsocketConsumer, consumer="chat"):
                 self.username,
                 self.chat_color,
                 self.channel_name,
+                self.logged_in
             )
         )
         await self.channel_layer.group_send(

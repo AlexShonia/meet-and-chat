@@ -13,6 +13,7 @@ import {
 	setupImageModal,
 	handleImagePaste,
 	setupImageUploadListener,
+	setupPublicProfileModal,
 } from "./chat_utils.js";
 
 const matchSound = document.getElementById("match-sound");
@@ -28,6 +29,7 @@ const secondUser = {
 	username: "",
 	chatColor: "",
 	channelName: "",
+	loggedIn: false,
 };
 
 let userHistory = [];
@@ -51,6 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			userHistory,
 			user.username,
 			user.chat_color,
+			user.user_id,
+			user.logged_in,
 			historyName
 		);
 	}
@@ -70,7 +74,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	setupImageModal();
 	handleImagePaste(() => imageConsent, chatSocket, user);
+	setupPublicProfileModal()
 });
+
 
 chatSocket.onmessage = function (e) {
 	const data = JSON.parse(e.data);
@@ -117,4 +123,4 @@ chatSocket.onclose = function (e) {
 
 setupChatInputHandlers(chatSocket);
 
-setupImageUploadListener(() => imageConsent, chatSocket, user)
+setupImageUploadListener(() => imageConsent, chatSocket, user);

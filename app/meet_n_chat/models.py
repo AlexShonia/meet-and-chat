@@ -11,6 +11,7 @@ class ChatQueue(models.Model):
     user_id = models.CharField(max_length=100, unique=True)
     username = models.CharField(max_length=32)
     chat_color = models.CharField(max_length=7)
+    logged_in = models.BooleanField(default=False)
 
 
 class VoiceChatQueue(models.Model):
@@ -19,6 +20,7 @@ class VoiceChatQueue(models.Model):
     user_id = models.CharField(max_length=100, unique=True)
     username = models.CharField(max_length=32)
     chat_color = models.CharField(max_length=7)
+    logged_in = models.BooleanField(default=False)
 
 
 class UserManager(BaseUserManager):

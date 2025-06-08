@@ -65,9 +65,11 @@ export function appendToHistory(
 	userHistory,
 	username,
 	chat_color,
-	historyName
+	user_id,
+	logged_in,
+	historyName = null
 ) {
-	if (userHistory.length >= maxHistorySize) {
+	if (userHistory.length >= maxHistorySize && historyName) {
 		localStorage.setItem(
 			historyName,
 			JSON.stringify(userHistory.slice(-maxHistorySize))
@@ -75,7 +77,7 @@ export function appendToHistory(
 	}
 
 	document.querySelector("#history").innerHTML =
-		`<div style="color: ${chat_color}; padding-top: 15px">${username}</div>` +
+		`<div class="history-user" logged_in="${logged_in}" id="${user_id}" style="color: ${chat_color}; ">${username} </div>` +
 		document.querySelector("#history").innerHTML;
 }
 
@@ -198,18 +200,30 @@ export function handleJoinMessage(
 	const message_user = data.user;
 	const channel_name = data.channel_name;
 	const amUser = data.user_id == user.id;
+	const logged_in = data.logged_in;
+	const second_user_logged_in = data.second_user_logged_in;
+	const second_user_id = data.second_user_id;
 
 	document.querySelector("#chat-messages").innerHTML = "";
 	if (amUser) {
 		secondUser.username = second_user;
 		secondUser.chatColor = second_user_color;
 		secondUser.channelName = second_channel_name;
+		secondUser.loggedIn = second_user_logged_in;
 
-		appendToHistory(userHistory, second_user, second_user_color);
+		appendToHistory(
+			userHistory,
+			second_user,
+			second_user_color,
+			second_user_id,
+			second_user_logged_in
+		);
 
 		userHistory.push({
 			username: second_user,
 			chat_color: second_user_color,
+			user_id: second_user_id,
+			logged_in: second_user_logged_in,
 		});
 		localStorage.setItem(historyName, JSON.stringify(userHistory));
 		document.querySelector(
@@ -219,14 +233,26 @@ export function handleJoinMessage(
 		secondUser.username = message_user;
 		secondUser.chatColor = chat_color;
 		secondUser.channelName = channel_name;
+		secondUser.loggedIn = logged_in;
 
 		document.querySelector(
 			"#chat-messages"
 		).innerHTML += `<div class="system-message"><span style="color: ${chat_color}">${message_user}</span> joined the chat</div>`;
-		userHistory.push({ username: message_user, chat_color: chat_color });
+		userHistory.push({
+			username: message_user,
+			chat_color: chat_color,
+			user_id: data.user_id,
+			logged_in: logged_in,
+		});
 		localStorage.setItem(historyName, JSON.stringify(userHistory));
 
-		appendToHistory(userHistory, message_user, chat_color);
+		appendToHistory(
+			userHistory,
+			message_user,
+			chat_color,
+			data.user_id,
+			logged_in
+		);
 
 		document.querySelector(
 			"#status"
@@ -397,6 +423,71 @@ export function setupImageUploadListener(getImageConsent, chatSocket, user) {
 				.catch((error) => {
 					console.error("Error:", error);
 				});
+		}
+	});
+}
+
+export function setupPublicProfileModal() {
+	const overlay = document.getElementById("publicProfileModalOverlay");
+	const main = document.querySelector("main");
+	async function openModal() {
+		// if (!user.loggedIn) {
+		// 	return;
+		// }
+
+		overlay.style.display = "flex";
+		main.setAttribute("inert", "");
+	}
+
+	function closeModal() {
+		overlay.style.display = "none";
+		main.removeAttribute("inert", "");
+	}
+
+	document.querySelector("#history").addEventListener("click", async (e) => {
+
+		if (
+			e.target.className != "history-user" ||
+			e.target.id == "undefined"
+		) {
+			return;
+		}
+		const userName = e.target.textContent;
+		const id = e.target.id;
+		const loggedIn = e.target.getAttribute("logged_in");
+		openModal();
+
+		document.querySelector("#publicUsername").textContent =
+			loggedIn == "true" ? userName : userName + " (guest)";
+
+		document.querySelector("#publicUsername").style.color =
+			e.target.style.color;
+
+		document.querySelector("#publicID").textContent = "#" + id;
+		// let response = await fetch(`/user/${e.target.id}/public-profile/`, {
+		// 	method: "GET",
+		// 	headers: {
+		// 		"X-CSRFToken": document.querySelector(
+		// 			"[name=csrfmiddlewaretoken]"
+		// 		).value,
+		// 	},
+		// });
+
+		// if (!response.ok) {
+		// 	throw new Error(`Error ${response.status}: ${response.statusText}`);
+		// }
+		// let userData = await response.json();
+	});
+
+	document
+		.querySelector("#publicProfileCloseModal")
+		?.addEventListener("click", () => {
+			closeModal();
+		});
+
+	overlay.addEventListener("click", function (e) {
+		if (e.target === overlay) {
+			closeModal();
 		}
 	});
 }

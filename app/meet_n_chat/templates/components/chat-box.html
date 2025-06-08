@@ -293,161 +293,175 @@
   img:hover {
     cursor: pointer;
   }
+  .history-user {
+    margin-top: 9px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+  .history-user:hover {
+    cursor: pointer;
+  }
 </style>
-{% load static %} {% include "components/settings.html" %}
+{% load static %} {% include "components/settings.html" %} 
+{% include "components/public-profile-modal.html" %}
 
-<audio
-  id="match-sound"
-  src="{% static 'meet_n_chat/audio/8bit-match-notification.mp3' %}"
-  preload="auto"
-></audio>
-<div id="image-modal" style="display: none">
-  <span id="image-modal-close">&times;</span>
-  <img id="image-modal-content" src="" alt="Zoomed image" />
-</div>
-<div
-  id="history_container"
-  style="
-    top: 48px;
-    left: 60px;
-    width: 200px;
-    height: 475px;
-    position: fixed;
-    font-size: 14px;
-    overflow-y: auto;
-    overflow-x: hidden;
-  "
->
-  <span>History: </span>
-  <div id="history"></div>
-</div>
-<div class="chat-container">
-  <div class="status-container">
-    <div id="left-buttons" style="display: flex; align-items: center; gap: 4px">
-      <button
-        id="go-back-btn"
-        onclick="window.location.href='{% url 'choose' %}'"
+<main>
+  <audio
+    id="match-sound"
+    src="{% static 'meet_n_chat/audio/8bit-match-notification.mp3' %}"
+    preload="auto"
+  ></audio>
+  <div id="image-modal" style="display: none">
+    <span id="image-modal-close">&times;</span>
+    <img id="image-modal-content" src="" alt="Zoomed image" />
+  </div>
+  <div
+    id="history_container"
+    style="
+      top: 48px;
+      left: 60px;
+      width: 180px;
+      height: 475px;
+      position: fixed;
+      font-size: 14px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    "
+  >
+    <span>History: </span>
+    <div id="history"></div>
+  </div>
+  <div class="chat-container">
+    <div class="status-container">
+      <div
+        id="left-buttons"
+        style="display: flex; align-items: center; gap: 4px"
       >
-        Go Back
-      </button>
-      <button id="control-btn" onclick="this.blur()">Start</button>
-      <div id="status"></div>
-    </div>
+        <button
+          id="go-back-btn"
+          onclick="window.location.href='{% url 'choose' %}'"
+        >
+          Go Back
+        </button>
+        <button id="control-btn" onclick="this.blur()">Start</button>
+        <div id="status"></div>
+      </div>
 
-    <div
-      id="right-buttons"
-      style="display: flex; flex-direction: row; gap: 4px"
-    >
-      <button style="width: 120px" id="consent-btn" onclick="this.blur(); ">
-        Allow Images
-      </button>
-      <button id="audio-toggle" class="audio-toggle">
+      <div
+        id="right-buttons"
+        style="display: flex; flex-direction: row; gap: 4px"
+      >
+        <button style="width: 120px" id="consent-btn" onclick="this.blur(); ">
+          Allow Images
+        </button>
+        <button id="audio-toggle" class="audio-toggle">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="800px"
+            height="800px"
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <path id="path-bg" d="M6 1H8V15H6L2 11H0V5H2L6 1Z" fill="#000000" />
+            <path
+              id="path-bg"
+              d="M14 8C14 5.79086 12.2091 4 10 4V2C13.3137 2 16 4.68629 16 8C16 11.3137 13.3137 14 10 14V12C12.2091 12 14 10.2091 14 8Z"
+            />
+            <path
+              id="path-bg"
+              d="M12 8C12 9.10457 11.1046 10 10 10V6C11.1046 6 12 6.89543 12 8Z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div id="chat-messages"></div>
+
+    <div class="input-container">
+      {% if voice_chat %}
+
+      <button
+        id="mic-toggle"
+        style="min-height: 24px; min-width: 24px"
+        class="audio-toggle"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="800px"
-          height="800px"
+          id="mic-svg"
+          width="64"
+          height="64"
           viewBox="0 0 16 16"
           fill="none"
         >
-          <path id="path-bg" d="M6 1H8V15H6L2 11H0V5H2L6 1Z" fill="#000000" />
+          <defs>
+            <clipPath id="mic-clip">
+              <!-- Fill bottom half: from y = 8 to y = 16 -->
+              <rect id="volume-fill" x="0" y="16" width="16" height="8" />
+            </clipPath>
+          </defs>
+
+          <!-- Background mic shape -->
           <path
             id="path-bg"
-            d="M14 8C14 5.79086 12.2091 4 10 4V2C13.3137 2 16 4.68629 16 8C16 11.3137 13.3137 14 10 14V12C12.2091 12 14 10.2091 14 8Z"
-          />
-          <path
-            id="path-bg"
-            d="M12 8C12 9.10457 11.1046 10 10 10V6C11.1046 6 12 6.89543 12 8Z"
-          />
-        </svg>
-      </button>
-    </div>
-  </div>
-  <div id="chat-messages"></div>
-
-  <div class="input-container">
-    {% if voice_chat %}
-
-    <button
-      id="mic-toggle"
-      style="min-height: 24px; min-width: 24px"
-      class="audio-toggle"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        id="mic-svg"
-        width="64"
-        height="64"
-        viewBox="0 0 16 16"
-        fill="none"
-      >
-        <defs>
-          <clipPath id="mic-clip">
-            <!-- Fill bottom half: from y = 8 to y = 16 -->
-            <rect id="volume-fill" x="0" y="16" width="16" height="8" />
-          </clipPath>
-        </defs>
-
-        <!-- Background mic shape -->
-        <path
-          id="path-bg"
-          d="M5 3C5 1.34315 6.34315 0 8 0C9.65685 0 11 1.34315 11 3V7C11 8.65685 9.65685 10 8 10C6.34315 10 5 8.65685 5 7V3Z"
-        />
-        <path
-          id="path-bg"
-          d="M9 13.9291V16H7V13.9291C3.60771 13.4439 1 10.5265 1 7V6H3V7C3 9.76142 5.23858 12 8 12C10.7614 12 13 9.76142 13 7V6H15V7C15 10.5265 12.3923 13.4439 9 13.9291Z"
-        />
-
-        <!-- Colored mic overlay, clipped to bottom half -->
-        <g id="volume-fill-color" clip-path="url(#mic-clip)">
-          <path
             d="M5 3C5 1.34315 6.34315 0 8 0C9.65685 0 11 1.34315 11 3V7C11 8.65685 9.65685 10 8 10C6.34315 10 5 8.65685 5 7V3Z"
           />
           <path
+            id="path-bg"
             d="M9 13.9291V16H7V13.9291C3.60771 13.4439 1 10.5265 1 7V6H3V7C3 9.76142 5.23858 12 8 12C10.7614 12 13 9.76142 13 7V6H15V7C15 10.5265 12.3923 13.4439 9 13.9291Z"
           />
-        </g>
-      </svg>
-    </button>
 
-    {% endif %}
-    <label
-      for="myFile"
-      class="upload-icon"
-      style="
-        cursor: pointer;
-        display: inline-block;
-        width: 24px;
-        height: 24px;
-        flex: 0 0 auto;
-      "
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 16 16"
-        style="fill: var(--text-color)"
+          <!-- Colored mic overlay, clipped to bottom half -->
+          <g id="volume-fill-color" clip-path="url(#mic-clip)">
+            <path
+              d="M5 3C5 1.34315 6.34315 0 8 0C9.65685 0 11 1.34315 11 3V7C11 8.65685 9.65685 10 8 10C6.34315 10 5 8.65685 5 7V3Z"
+            />
+            <path
+              d="M9 13.9291V16H7V13.9291C3.60771 13.4439 1 10.5265 1 7V6H3V7C3 9.76142 5.23858 12 8 12C10.7614 12 13 9.76142 13 7V6H15V7C15 10.5265 12.3923 13.4439 9 13.9291Z"
+            />
+          </g>
+        </svg>
+      </button>
+
+      {% endif %}
+      <label
+        for="myFile"
+        class="upload-icon"
+        style="
+          cursor: pointer;
+          display: inline-block;
+          width: 24px;
+          height: 24px;
+          flex: 0 0 auto;
+        "
       >
-        <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          d="M1 1H15V15H1V1ZM6 9L8 11L13 6V13H3V12L6 9ZM6.5 7C7.32843 7 8 6.32843 8 5.5C8 4.67157 7.32843 4 6.5 4C5.67157 4 5 4.67157 5 5.5C5 6.32843 5.67157 7 6.5 7Z"
-        />
-      </svg>
-    </label>
-    <input
-      type="file"
-      id="myFile"
-      name="filename"
-      accept="image/*"
-      style="display: none"
-      disabled
-    />
-    <input
-      id="chat-message-input"
-      type="text"
-      placeholder="Type your message..."
-      maxlength="1000"
-    />
-    <input id="chat-message-submit" type="button" value="Send" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+          style="fill: var(--text-color)"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M1 1H15V15H1V1ZM6 9L8 11L13 6V13H3V12L6 9ZM6.5 7C7.32843 7 8 6.32843 8 5.5C8 4.67157 7.32843 4 6.5 4C5.67157 4 5 4.67157 5 5.5C5 6.32843 5.67157 7 6.5 7Z"
+          />
+        </svg>
+      </label>
+      <input
+        type="file"
+        id="myFile"
+        name="filename"
+        accept="image/*"
+        style="display: none"
+        disabled
+      />
+      <input
+        id="chat-message-input"
+        type="text"
+        placeholder="Type your message..."
+        maxlength="1000"
+      />
+      <input id="chat-message-submit" type="button" value="Send" />
+    </div>
+    {% csrf_token %}
   </div>
-  {% csrf_token %}
-</div>
+</main>

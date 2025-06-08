@@ -11,7 +11,7 @@ from app.meet_n_chat.utils import (
     handle_stop,
     handle_image_consent,
     handle_default,
-    cleanup_user_images
+    cleanup_user_images,
 )
 
 
@@ -19,9 +19,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.channel_layer: RedisChannelLayer
         session = self.scope["session"]
-        # Perhaps we dont store these inside this object?
         self.username = session.get("username")
         self.user_id = session.get("user_id")
+        self.logged_in = session.get("logged_in")
         self.chat_color = pick_random_color()
         self.image_consent = False
 
@@ -42,7 +42,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         await handle_stop(self)
         asyncio.create_task(cleanup_user_images(self))
-
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
@@ -65,9 +64,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user_id = event.get("user_id")
         chat_event = event.get("event")
         chat_color = event.get("chat_color")
+        logged_in = event.get("logged_in")
         second_user = event.get("second_user")
         second_channel_name = event.get("second_channel_name")
         second_user_color = event.get("second_user_color")
+        second_user_logged_in = event.get("second_user_logged_in")
+        second_user_id = event.get("second_user_id")
 
         if second_user:
             await self.send(
@@ -82,6 +84,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "second_user_color": second_user_color,
                         "event": chat_event,
                         "chat_color": chat_color,
+                        "logged_in": logged_in,
+                        "second_user_logged_in": second_user_logged_in,
+                        "second_user_id": second_user_id,
                     }
                 )
             )
@@ -106,9 +111,9 @@ class VoiceChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.channel_layer: RedisChannelLayer
         session = self.scope["session"]
-        # Perhaps we dont store these inside this object?
         self.username = session.get("username")
         self.user_id = session.get("user_id")
+        self.logged_in = session.get("logged_in")
         self.chat_color = pick_random_color()
         self.image_consent = False
 

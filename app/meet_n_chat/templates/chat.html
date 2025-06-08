@@ -1,4 +1,4 @@
 {% extends "base.html" %} {% block content %} {% load static %}
-{{user_id|json_script:"user-id"}} {% include "components/chat-box.html" %}
+{{user_id|json_script:"user-id"}}{% include "components/chat-box.html" %}
 <script type="module" src="{% static 'meet_n_chat/js/chat.js' %}"></script>
 {% endblock %}
