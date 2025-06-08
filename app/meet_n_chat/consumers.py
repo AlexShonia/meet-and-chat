@@ -40,7 +40,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def disconnect(self, close_code):
-        await handle_stop(self, "voice")
+        await handle_stop(self)
         asyncio.create_task(cleanup_user_images(self))
 
 
