@@ -38,7 +38,7 @@ class ChooseView(PublicApi):
         request.session["logged_in"] = False
 
 
-        return render(request, "choose.html")
+        return Response({"redirect_url": "choose"}, status=status.HTTP_200_OK)
 
     def get(self, request: Request):
         if request.user.is_authenticated:

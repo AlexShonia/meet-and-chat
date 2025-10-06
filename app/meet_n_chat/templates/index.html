@@ -279,47 +279,77 @@
 </style>
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
-  function onSubmit(token) {
-    const usernameInputDom = document.querySelector("#choose-username-input");
-    const username = usernameInputDom.value;
-    if (username.trim()) {
-      document.getElementById("username-form").submit();
-      usernameInputDom.value = "";
-    } else {
+  async function onSubmit(token) {
+    const input = document.getElementById("choose-username-input");
+    const username = input.value.trim();
+
+    if (!username) {
+      input.placeholder = "⚠️ Please enter a username";
+      input.classList.add("error-placeholder");
+      grecaptcha.reset();
+      return;
+    }
+
+    try {
+      const response = await fetch("{% url 'choose' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify({ username }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        input.value = "";
+        input.placeholder = data.message || "Something went wrong!";
+        input.classList.add("error-placeholder");
+        grecaptcha.reset();
+        return;
+      }
+
+      if (data.redirect_url) {
+        window.location.href = data.redirect_url;
+      }
+    } catch (err) {
+      console.error(err);
+      input.placeholder = "⚠️ Network error, try again!";
+      input.classList.add("error-placeholder");
       grecaptcha.reset();
     }
   }
+
   function googleLogin() {
     window.location.href = `${window.location.origin}/api/google-oauth2/login/redirect/`;
   }
 </script>
+
 {% load static %}
 <button class="theme-switch" onclick="toggleTheme()">Toggle Theme</button>
 <div class="container">
   <div class="title" style="font-weight: bold">MEET AND CHAT</div>
   <button class="google-btn" onclick="googleLogin()">Log in with Google</button>
   <div class="divider">or</div>
-  <form method="POST" action="{% url 'choose' %}" id="username-form">
-    {% csrf_token %}
-    <div class="form-group">
-      <input
-        id="choose-username-input"
-        name="username"
-        type="text"
-        placeholder="Enter your username"
-        maxlength="32"
-      />
-    </div>
-    <button
-      class="guest-btn g-recaptcha"
-      data-sitekey="6LfQgDUrAAAAAKFQ1Aw_5CMSYZwsuC6b3u-1g-a_"
-      id="choose-name-submit"
-      data-callback="onSubmit"
-    >
-      Join as guest
-    </button>
-  </form>
+
+  <div class="form-group">
+    <input
+      id="choose-username-input"
+      name="username"
+      type="text"
+      placeholder="Enter your username"
+      maxlength="32"
+    />
+  </div>
+  <button
+    class="guest-btn g-recaptcha"
+    data-sitekey="6LfQgDUrAAAAAKFQ1Aw_5CMSYZwsuC6b3u-1g-a_"
+    data-callback="onSubmit"
+    id="choose-name-submit"
+  >
+    Join as guest
+  </button>
 </div>
 
-<script type="module" src="{% static 'meet_n_chat/js/index.js' %}"></script>
 {% endblock %}
