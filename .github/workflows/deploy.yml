@@ -24,9 +24,6 @@ jobs:
             echo "Pulling latest changes..."
             git pull
 
-            echo "Stopping containers..."
-            docker compose down
-
             echo "Rebuilding and starting..."
             docker compose up --build -d
 
